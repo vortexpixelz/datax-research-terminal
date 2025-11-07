@@ -31,13 +31,12 @@ export function StockChart({ ticker }: StockChartProps) {
         const to = new Date().toISOString().split("T")[0]
         const from = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0]
 
-        const response = await fetch(`/api/market/history?symbol=${ticker}&from=${from}&to=${to}`)
+        const response = await fetch(`/api/market/history?ticker=${ticker}&from=${from}&to=${to}`)
         const result = await response.json()
-        const bars = Array.isArray(result) ? result : result.results ?? []
 
-        if (bars.length > 0) {
-          const labels = bars.map((d: any) => new Date(d.timestamp).toLocaleDateString())
-          const prices = bars.map((d: any) => d.close)
+        if (result.results && result.results.length > 0) {
+          const labels = result.results.map((d: any) => new Date(d.t).toLocaleDateString())
+          const prices = result.results.map((d: any) => d.c)
 
           setData({
             labels,

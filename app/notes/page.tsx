@@ -73,13 +73,10 @@ export default function NotesPage() {
   }
 
   const handleDeleteNote = (id: string) => {
-    setNotes((prev) => {
-      const updated = prev.filter((note) => note.id !== id)
-      if (selectedNoteId === id) {
-        setSelectedNoteId(updated[0]?.id || null)
-      }
-      return updated
-    })
+    setNotes((prev) => prev.filter((note) => note.id !== id))
+    if (selectedNoteId === id) {
+      setSelectedNoteId(notes[0]?.id || null)
+    }
   }
 
   return (
