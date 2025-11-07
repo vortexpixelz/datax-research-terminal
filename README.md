@@ -47,7 +47,17 @@ POLYGON_API_KEY=your_polygon_api_key
 
 # App URL (for API calls)
 NEXT_PUBLIC_APP_URL=http://localhost:3000
+
+# Postgres connection (Prisma requires both URLs)
+DATABASE_URL="postgresql://user:password@localhost:5432/db"
+DIRECT_URL="postgresql://user:password@localhost:5432/db"
+
+# NextAuth secrets
+NEXTAUTH_SECRET=generated_with_openssl_or_node
+NEXTAUTH_URL=http://localhost:3000
 \`\`\`
+
+Use `node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"` to generate a secure `NEXTAUTH_SECRET` for development and save it in `.env.local`.
 
 ### 3. Run Development Server
 

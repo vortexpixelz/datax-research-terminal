@@ -12,6 +12,7 @@ if (!apiKey) {
 }
 
 export async function POST(req: Request) {
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || new URL(req.url).origin
   const clientApiKey = req.headers.get("x-groq-api-key")
   const effectiveApiKey = clientApiKey || apiKey
 
@@ -59,9 +60,7 @@ Always cite data sources and be transparent about limitations. Use tools to fetc
         execute: async ({ ticker }) => {
           console.log("[v0] Fetching quote for:", ticker)
           try {
-            const response = await fetch(
-              `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/market/quote?symbol=${ticker}`,
-            )
+            const response = await fetch(`${baseUrl}/api/market/quote?symbol=${ticker}`)
             const data = await response.json()
             console.log("[v0] Quote data:", data)
             return data
@@ -79,9 +78,7 @@ Always cite data sources and be transparent about limitations. Use tools to fetc
         execute: async ({ ticker }) => {
           console.log("[v0] Fetching details for:", ticker)
           try {
-            const response = await fetch(
-              `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/market/details?symbol=${ticker}`,
-            )
+            const response = await fetch(`${baseUrl}/api/market/details?symbol=${ticker}`)
             const data = await response.json()
             console.log("[v0] Details data:", data)
             return data
@@ -101,9 +98,7 @@ Always cite data sources and be transparent about limitations. Use tools to fetc
         execute: async ({ ticker, from, to }) => {
           console.log("[v0] Fetching history for:", ticker, from, to)
           try {
-            const response = await fetch(
-              `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/market/history?symbol=${ticker}&from=${from}&to=${to}`,
-            )
+            const response = await fetch(`${baseUrl}/api/market/history?symbol=${ticker}&from=${from}&to=${to}`)
             const data = await response.json()
             console.log("[v0] History data:", data)
             return data

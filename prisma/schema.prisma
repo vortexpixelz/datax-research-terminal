@@ -1,0 +1,112 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id    Int     @id @default(autoincrement())
+  email String  @unique
+  password_hash String
+
+  notes             Note[]
+  portfolioPositions PortfolioPosition[]
+  watchlistItems    WatchlistItem[]
+  chatMessages      ChatMessage[]
+  savedScreens      SavedScreen[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model Note {
+  id    Int     @id @default(autoincrement())
+  userId Int
+  user  User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  title   String
+  content String @db.Text
+  tags    String[]
+
+  // Relations for WikiLinks
+  sourceLinks   NoteLink[] @relation("SourceNote")
+  targetLinks   NoteLink[] @relation("TargetNote")
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@unique([userId, title])
+}
+
+model NoteLink {
+  id    Int     @id @default(autoincrement())
+
+  sourceNoteId Int
+  sourceNote   Note   @relation("SourceNote", fields: [sourceNoteId], references: [id], onDelete: Cascade)
+
+  targetNoteId Int?
+  targetNote   Note?  @relation("TargetNote", fields: [targetNoteId], references: [id], onDelete: SetNull)
+
+  targetTitle  String? // For stub links (notes that don't exist yet)
+
+  created_at DateTime @default(now())
+}
+
+model PortfolioPosition {
+  id    Int     @id @default(autoincrement())
+  userId Int
+  user  User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  symbol String
+  assetType String // 'stock' or 'crypto'
+  quantity Decimal @db.Decimal(15, 8)
+  avgCost Decimal @db.Decimal(15, 2)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@unique([userId, symbol])
+}
+
+model WatchlistItem {
+  id    Int     @id @default(autoincrement())
+  userId Int
+  user  User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  symbol String
+  assetType String // 'stock' or 'crypto'
+
+  created_at DateTime @default(now())
+
+  @@unique([userId, symbol])
+}
+
+model ChatMessage {
+  id    Int     @id @default(autoincrement())
+  userId Int
+  user  User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  role String // 'user' or 'assistant'
+  content String @db.Text
+
+  created_at DateTime @default(now())
+}
+
+model SavedScreen {
+  id    Int     @id @default(autoincrement())
+  userId Int
+  user  User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name String
+  criteria Json // Store screener criteria as JSON
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
