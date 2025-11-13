@@ -6,7 +6,7 @@ import { useState } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { StockChart } from "@/components/stock-chart"
+import { StockChart, type Timeframe } from "@/components/stock-chart"
 import { MarketIndices } from "@/components/market-indices"
 import { TopMovers } from "@/components/top-movers"
 import { KalshiMarkets } from "@/components/kalshi-markets"
@@ -15,6 +15,9 @@ import { MarketInsights } from "@/components/market-insights"
 export default function MarketsPage() {
   const [selectedTicker, setSelectedTicker] = useState("AAPL")
   const [tickerInput, setTickerInput] = useState("")
+  const [timeframe, setTimeframe] = useState<Timeframe>("1M")
+
+  const timeframes: Timeframe[] = ["1D", "5D", "1M", "3M", "1Y", "5Y"]
 
   const handleSearchTicker = (e: React.FormEvent) => {
     e.preventDefault()
@@ -62,11 +65,24 @@ export default function MarketsPage() {
             <div className="border-b px-4 py-2 bg-muted">
               <div className="flex items-center justify-between">
                 <h2 className="text-xs font-bold text-primary uppercase tracking-wider">{selectedTicker} - CHART</h2>
-                <div className="text-xs text-muted-foreground">1D | 5D | 1M | 3M | 1Y | 5Y</div>
+                <div className="flex items-center gap-1.5">
+                  {timeframes.map((tf) => (
+                    <Button
+                      key={tf}
+                      type="button"
+                      size="sm"
+                      variant={timeframe === tf ? "default" : "outline"}
+                      className="h-7 px-2 text-[10px] font-semibold"
+                      onClick={() => setTimeframe(tf)}
+                    >
+                      {tf}
+                    </Button>
+                  ))}
+                </div>
               </div>
             </div>
             <div className="p-4">
-              <StockChart ticker={selectedTicker} />
+              <StockChart ticker={selectedTicker} timeframe={timeframe} />
             </div>
           </div>
 
