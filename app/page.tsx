@@ -9,10 +9,14 @@ import { Send } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import Link from "next/link"
+codex/add-textarea-length-tracking-and-counter
 import { useState } from "react"
 
 const HIGHLIGHT_THRESHOLD = 1000
 const HARD_LIMIT = 1500
+
+import { useEffect, useRef, useState } from "react"
+main
 
 export default function ChatPage() {
   const { messages, sendMessage, status } = useChat({
@@ -25,6 +29,7 @@ export default function ChatPage() {
     }),
   })
 
+codex/add-textarea-length-tracking-and-counter
   const [input, setInput] = useState("")
 
   const inputLength = input.length
@@ -35,13 +40,56 @@ export default function ChatPage() {
     : isOverThreshold
       ? "text-amber-500"
       : "text-muted-foreground"
+  const [isApiKeyMissing, setIsApiKeyMissing] = useState(false)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+main
+
+  useEffect(() => {
+    if (typeof window === "undefined") return
+
+    const checkApiKey = () => {
+      const hasKey = Boolean(localStorage.getItem("groq_api_key"))
+      setIsApiKeyMissing(!hasKey)
+    }
+
+    checkApiKey()
+    window.addEventListener("storage", checkApiKey)
+
+    return () => {
+      window.removeEventListener("storage", checkApiKey)
+    }
+  }, [])
+
+  const ensureApiKey = () => {
+    if (typeof window === "undefined") {
+      return true
+    }
+
+    const hasKey = Boolean(localStorage.getItem("groq_api_key"))
+    setIsApiKeyMissing(!hasKey)
+    return hasKey
+  }
+
+  const sendMessageWithKeyCheck = (payload: Parameters<typeof sendMessage>[0]) => {
+    if (!ensureApiKey()) {
+      return false
+    }
+
+    sendMessage(payload)
+    return true
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!input.trim() || status === "in_progress" || isAtOrOverLimit) return
 
+codex/add-textarea-length-tracking-and-counter
     sendMessage({ text: input })
     setInput("")
+    if (sendMessageWithKeyCheck({ text: input })) {
+      textarea.value = ""
+    }
+main
   }
 
   return (
@@ -51,7 +99,7 @@ export default function ChatPage() {
         <div className="border-b bg-card p-2.5">
           <TickerSearch
             onSelectTicker={(symbol) => {
-              sendMessage({ text: `Tell me about ${symbol}` })
+              sendMessageWithKeyCheck({ text: `Tell me about ${symbol}` })
             }}
           />
         </div>
@@ -160,6 +208,11 @@ export default function ChatPage() {
         {/* Input Area */}
         <div className="border-t bg-card">
           <div className="container max-w-5xl mx-auto p-3">
+            {isApiKeyMissing && (
+              <div className="mb-2 rounded-md border border-amber-400 bg-amber-100/80 px-3 py-2 text-xs text-amber-900">
+                Groq API key is missing. Add one in the <Link href="/settings" className="underline">Settings</Link> page.
+              </div>
+            )}
             <form onSubmit={handleSubmit} className="flex gap-2">
               <Textarea
                 name="message"

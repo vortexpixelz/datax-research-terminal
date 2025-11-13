@@ -16,11 +16,27 @@ import {
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler)
 
+export type Timeframe = "1D" | "5D" | "1M" | "3M" | "1Y" | "5Y"
+
 type StockChartProps = {
   ticker: string
+  timeframe: Timeframe
 }
 
-export function StockChart({ ticker }: StockChartProps) {
+const TIMEFRAME_CONFIG: Record<Timeframe, { days: number; timespan: "day" | "week" | "month" }> = {
+  "1D": { days: 1, timespan: "day" },
+  "5D": { days: 5, timespan: "day" },
+  "1M": { days: 30, timespan: "day" },
+  "3M": { days: 90, timespan: "week" },
+  "1Y": { days: 365, timespan: "week" },
+  "5Y": { days: 365 * 5, timespan: "month" },
+}
+
+function formatDate(date: Date) {
+  return date.toISOString().split("T")[0]
+}
+
+export function StockChart({ ticker, timeframe }: StockChartProps) {
   const [data, setData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
 
@@ -28,10 +44,15 @@ export function StockChart({ ticker }: StockChartProps) {
     const fetchData = async () => {
       setLoading(true)
       try {
-        const to = new Date().toISOString().split("T")[0]
-        const from = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0]
+        const { days, timespan } = TIMEFRAME_CONFIG[timeframe]
+        const now = new Date()
+        const fromDate = new Date(now.getTime() - days * 24 * 60 * 60 * 1000)
+        const to = formatDate(now)
+        const from = formatDate(fromDate)
 
-        const response = await fetch(`/api/market/history?ticker=${ticker}&from=${from}&to=${to}`)
+        const response = await fetch(
+          `/api/market/history?symbol=${ticker}&from=${from}&to=${to}&timespan=${timespan}`,
+        )
         const result = await response.json()
 
         if (result.results && result.results.length > 0) {
@@ -53,6 +74,8 @@ export function StockChart({ ticker }: StockChartProps) {
               },
             ],
           })
+        } else {
+          setData(null)
         }
       } catch (error) {
         console.error("[v0] Failed to fetch chart data:", error)
@@ -62,7 +85,7 @@ export function StockChart({ ticker }: StockChartProps) {
     }
 
     fetchData()
-  }, [ticker])
+  }, [ticker, timeframe])
 
   if (loading) {
     return <div className="h-[400px] flex items-center justify-center text-muted-foreground">Loading chart data...</div>
