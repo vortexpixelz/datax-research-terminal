@@ -11,17 +11,37 @@ import { MarketIndices } from "@/components/market-indices"
 import { TopMovers } from "@/components/top-movers"
 import { KalshiMarkets } from "@/components/kalshi-markets"
 import { MarketInsights } from "@/components/market-insights"
+import { X } from "lucide-react"
 
 export default function MarketsPage() {
   const [selectedTicker, setSelectedTicker] = useState("AAPL")
   const [tickerInput, setTickerInput] = useState("")
+  const [comparisonTickers, setComparisonTickers] = useState<string[]>([])
+  const [comparisonInput, setComparisonInput] = useState("")
 
   const handleSearchTicker = (e: React.FormEvent) => {
     e.preventDefault()
-    if (tickerInput.trim()) {
-      setSelectedTicker(tickerInput.toUpperCase())
+    const symbol = tickerInput.trim().toUpperCase()
+    if (symbol) {
+      setSelectedTicker(symbol)
+      setComparisonTickers((current) => current.filter((ticker) => ticker !== symbol))
       setTickerInput("")
     }
+  }
+
+  const handleAddComparisonTicker = (e: React.FormEvent) => {
+    e.preventDefault()
+    const symbol = comparisonInput.trim().toUpperCase()
+    if (!symbol || symbol === selectedTicker || comparisonTickers.includes(symbol)) {
+      setComparisonInput("")
+      return
+    }
+    setComparisonTickers((current) => [...current, symbol])
+    setComparisonInput("")
+  }
+
+  const handleRemoveComparisonTicker = (ticker: string) => {
+    setComparisonTickers((current) => current.filter((item) => item !== ticker))
   }
 
   return (
@@ -65,8 +85,51 @@ export default function MarketsPage() {
                 <div className="text-xs text-muted-foreground">1D | 5D | 1M | 3M | 1Y | 5Y</div>
               </div>
             </div>
-            <div className="p-4">
-              <StockChart ticker={selectedTicker} />
+            <div className="p-4 space-y-4">
+              <div className="space-y-2">
+                <form onSubmit={handleAddComparisonTicker} className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                  <Input
+                    value={comparisonInput}
+                    onChange={(e) => setComparisonInput(e.target.value)}
+                    placeholder="ADD COMPARISON TICKER"
+                    className="h-8 text-xs uppercase bg-background sm:w-56"
+                  />
+                  <div className="flex gap-2">
+                    <Button type="submit" size="sm" className="h-8 text-xs bg-primary hover:bg-primary/90">
+                      ADD
+                    </Button>
+                    {comparisonTickers.length > 0 && (
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        className="h-8 text-xs"
+                        onClick={() => setComparisonTickers([])}
+                      >
+                        CLEAR
+                      </Button>
+                    )}
+                  </div>
+                </form>
+                {comparisonTickers.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {comparisonTickers.map((ticker) => (
+                      <Button
+                        key={ticker}
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-8 text-xs"
+                        onClick={() => handleRemoveComparisonTicker(ticker)}
+                      >
+                        {ticker}
+                        <X className="size-3" />
+                      </Button>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <StockChart tickers={[selectedTicker, ...comparisonTickers]} />
             </div>
           </div>
 
