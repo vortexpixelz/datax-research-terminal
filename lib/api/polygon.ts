@@ -37,6 +37,15 @@ export interface HistoricalBar {
   volume: number
 }
 
+export interface MarketNewsItem {
+  id: string
+  title: string
+  url: string
+  summary: string
+  publishedAt: string
+  source: string
+}
+
 // Get real-time quote for a symbol
 export async function getQuote(symbol: string): Promise<StockQuote | null> {
   const apiKey = process.env.POLYGON_API_KEY
@@ -147,6 +156,47 @@ export async function getHistoricalData(
   }
 }
 
+export async function getMarketNews(limit = 8): Promise<MarketNewsItem[]> {
+  const apiKey = process.env.POLYGON_API_KEY
+
+  if (!apiKey) {
+    console.log("[v0] POLYGON_API_KEY not found, returning mock market news")
+    return getMockMarketNews()
+  }
+
+  try {
+    const url = new URL(`${POLYGON_BASE_URL}/v2/reference/news`)
+    url.searchParams.set("limit", String(limit))
+    url.searchParams.set("order", "desc")
+    url.searchParams.set("sort", "published_utc")
+    url.searchParams.set("apiKey", apiKey)
+
+    const response = await fetch(url.toString())
+
+    if (!response.ok) {
+      throw new Error(`Polygon API error: ${response.status}`)
+    }
+
+    const data = await response.json()
+
+    if (!Array.isArray(data.results)) {
+      return getMockMarketNews()
+    }
+
+    return data.results.map((item: any) => ({
+      id: item.id ?? item.article_url,
+      title: item.title ?? "Untitled",
+      url: item.article_url ?? "#",
+      summary: item.description ?? item.summary ?? "",
+      publishedAt: item.published_utc ?? new Date().toISOString(),
+      source: item.publisher?.name ?? "Polygon",
+    }))
+  } catch (error) {
+    console.error("[v0] Error fetching market news:", error)
+    return getMockMarketNews()
+  }
+}
+
 // Mock data functions for development
 function getMockQuote(symbol: string): StockQuote {
   const basePrice = 100 + Math.random() * 400
@@ -203,4 +253,43 @@ function getMockHistoricalData(symbol: string): HistoricalBar[] {
   }
 
   return bars
+}
+
+function getMockMarketNews(): MarketNewsItem[] {
+  const now = new Date()
+
+  return [
+    {
+      id: "mock-1",
+      title: "Tech Stocks Rally as AI Demand Surges",
+      url: "https://example.com/news/tech-ai-demand",
+      summary: "Mega-cap technology shares led gains in U.S. markets as investors rotated into AI beneficiaries following a fresh wave of enterprise spending forecasts.",
+      publishedAt: new Date(now.getTime() - 15 * 60000).toISOString(),
+      source: "MarketWatch",
+    },
+    {
+      id: "mock-2",
+      title: "Treasury Yields Slip Ahead of Fed Meeting",
+      url: "https://example.com/news/treasury-yields-fed",
+      summary: "Bond markets priced a higher probability of rate cuts later this year, sending the 10-year yield lower and boosting rate-sensitive equities.",
+      publishedAt: new Date(now.getTime() - 45 * 60000).toISOString(),
+      source: "Bloomberg",
+    },
+    {
+      id: "mock-3",
+      title: "Oil Prices Stabilize as OPEC Signals Flexibility",
+      url: "https://example.com/news/opec-oil-prices",
+      summary: "Crude futures steadied after OPEC+ members indicated they could adjust output targets swiftly if demand weakens into year-end.",
+      publishedAt: new Date(now.getTime() - 90 * 60000).toISOString(),
+      source: "Reuters",
+    },
+    {
+      id: "mock-4",
+      title: "Dollar Weakens with Softening Economic Data",
+      url: "https://example.com/news/dollar-weakness",
+      summary: "The U.S. dollar index slipped to a two-week low as manufacturing surveys showed cooling momentum, lifting commodities and emerging-market currencies.",
+      publishedAt: new Date(now.getTime() - 2 * 60 * 60000).toISOString(),
+      source: "Financial Times",
+    },
+  ]
 }

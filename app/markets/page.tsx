@@ -11,6 +11,7 @@ import { MarketIndices } from "@/components/market-indices"
 import { TopMovers } from "@/components/top-movers"
 import { KalshiMarkets } from "@/components/kalshi-markets"
 import { MarketInsights } from "@/components/market-insights"
+import { MarketNews } from "@/components/market-news"
 
 export default function MarketsPage() {
   const [selectedTicker, setSelectedTicker] = useState("AAPL")
@@ -50,8 +51,9 @@ export default function MarketsPage() {
 
         <div className="container max-w-7xl mx-auto p-4 space-y-4">
           <div className="grid grid-cols-3 gap-4">
-            <div className="col-span-2">
+            <div className="col-span-2 space-y-4">
               <MarketInsights />
+              <MarketNews />
             </div>
             <MarketIndices />
           </div>
