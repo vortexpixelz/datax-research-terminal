@@ -1,5 +1,6 @@
 import { convertToModelMessages, streamText, tool, type UIMessage, stepCountIs } from "ai"
 import { createGroq } from "@ai-sdk/groq"
+import * as Sentry from "@sentry/nextjs"
 import { z } from "zod"
 import { AI_CONFIG } from "@/lib/config/ai-model"
 
@@ -11,7 +12,7 @@ if (!apiKey) {
   console.error("[v0] GROQ_API_KEY is missing. Please add it in the Vars section of the sidebar.")
 }
 
-export async function POST(req: Request) {
+async function handler(req: Request) {
   const clientApiKey = req.headers.get("x-groq-api-key")
   const effectiveApiKey = clientApiKey || apiKey
 
@@ -67,6 +68,7 @@ Always cite data sources and be transparent about limitations. Use tools to fetc
             return data
           } catch (error) {
             console.error("[v0] Error fetching quote:", error)
+            Sentry.captureException(error)
             return { error: "Failed to fetch quote data" }
           }
         },
@@ -87,6 +89,7 @@ Always cite data sources and be transparent about limitations. Use tools to fetc
             return data
           } catch (error) {
             console.error("[v0] Error fetching details:", error)
+            Sentry.captureException(error)
             return { error: "Failed to fetch company details" }
           }
         },
@@ -109,6 +112,7 @@ Always cite data sources and be transparent about limitations. Use tools to fetc
             return data
           } catch (error) {
             console.error("[v0] Error fetching history:", error)
+            Sentry.captureException(error)
             return { error: "Failed to fetch historical data" }
           }
         },
@@ -119,3 +123,5 @@ Always cite data sources and be transparent about limitations. Use tools to fetc
 
   return result.toUIMessageStreamResponse()
 }
+
+export const POST = Sentry.wrapRouteHandlerWithSentry(handler, "/api/chat")

@@ -11,6 +11,7 @@ import { AllocationChart } from "@/components/allocation-chart"
 import { Watchlist } from "@/components/watchlist"
 import { AddHoldingDialog } from "@/components/add-holding-dialog"
 import { AddWatchlistDialog } from "@/components/add-watchlist-dialog"
+import { SentryErrorBoundary } from "@/components/sentry-error-boundary"
 
 export type Holding = {
   id: string
@@ -102,87 +103,101 @@ export default function PortfolioPage() {
   const totalGainPercent = (totalGain / totalCost) * 100
 
   return (
-    <div className="flex h-screen">
-      {/* Main Content Area */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="container max-w-7xl mx-auto p-6 space-y-6">
-          <div className="flex items-center justify-between">
-            <h1 className="text-3xl font-semibold">Portfolio</h1>
+    <SentryErrorBoundary name="portfolio-page">
+      <div className="flex h-screen">
+        {/* Main Content Area */}
+        <div className="flex-1 overflow-y-auto">
+          <div className="container max-w-7xl mx-auto p-6 space-y-6">
+            <div className="flex items-center justify-between">
+              <h1 className="text-3xl font-semibold">Portfolio</h1>
+            </div>
+
+            <SentryErrorBoundary name="portfolio-stats">
+              <PortfolioStats
+                totalValue={totalValue}
+                totalCost={totalCost}
+                totalGain={totalGain}
+                totalGainPercent={totalGainPercent}
+              />
+            </SentryErrorBoundary>
+
+            <Tabs defaultValue="holdings" className="w-full">
+              <TabsList>
+                <TabsTrigger value="holdings">Holdings</TabsTrigger>
+                <TabsTrigger value="allocation">Allocation</TabsTrigger>
+                <TabsTrigger value="watchlist">Watchlist</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="holdings" className="space-y-4">
+                <div className="flex justify-end">
+                  <Button onClick={() => setShowAddHolding(true)}>
+                    <Plus className="h-4 w-4 mr-1" />
+                    Add Holding
+                  </Button>
+                </div>
+                <SentryErrorBoundary name="portfolio-holdings">
+                  <PortfolioHoldings holdings={holdings} onRemove={handleRemoveHolding} />
+                </SentryErrorBoundary>
+              </TabsContent>
+
+              <TabsContent value="allocation">
+                <SentryErrorBoundary name="allocation-chart">
+                  <AllocationChart holdings={holdings} />
+                </SentryErrorBoundary>
+              </TabsContent>
+
+              <TabsContent value="watchlist" className="space-y-4">
+                <div className="flex justify-end">
+                  <Button onClick={() => setShowAddWatchlist(true)}>
+                    <Plus className="h-4 w-4 mr-1" />
+                    Add to Watchlist
+                  </Button>
+                </div>
+                <SentryErrorBoundary name="watchlist">
+                  <Watchlist items={watchlist} onRemove={handleRemoveWatchlist} />
+                </SentryErrorBoundary>
+              </TabsContent>
+            </Tabs>
           </div>
-
-          <PortfolioStats
-            totalValue={totalValue}
-            totalCost={totalCost}
-            totalGain={totalGain}
-            totalGainPercent={totalGainPercent}
-          />
-
-          <Tabs defaultValue="holdings" className="w-full">
-            <TabsList>
-              <TabsTrigger value="holdings">Holdings</TabsTrigger>
-              <TabsTrigger value="allocation">Allocation</TabsTrigger>
-              <TabsTrigger value="watchlist">Watchlist</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="holdings" className="space-y-4">
-              <div className="flex justify-end">
-                <Button onClick={() => setShowAddHolding(true)}>
-                  <Plus className="h-4 w-4 mr-1" />
-                  Add Holding
-                </Button>
-              </div>
-              <PortfolioHoldings holdings={holdings} onRemove={handleRemoveHolding} />
-            </TabsContent>
-
-            <TabsContent value="allocation">
-              <AllocationChart holdings={holdings} />
-            </TabsContent>
-
-            <TabsContent value="watchlist" className="space-y-4">
-              <div className="flex justify-end">
-                <Button onClick={() => setShowAddWatchlist(true)}>
-                  <Plus className="h-4 w-4 mr-1" />
-                  Add to Watchlist
-                </Button>
-              </div>
-              <Watchlist items={watchlist} onRemove={handleRemoveWatchlist} />
-            </TabsContent>
-          </Tabs>
         </div>
+
+        {/* Right Sidebar Navigation */}
+        <aside className="w-64 border-l bg-background p-6 flex flex-col gap-6">
+          <div className="font-bold text-lg">Datax Market Research</div>
+
+          <nav className="flex flex-col gap-2">
+            <Link href="/" className="px-3 py-2 text-sm font-medium rounded hover:bg-muted transition-colors">
+              AI Chat
+            </Link>
+            <Link href="/notes" className="px-3 py-2 text-sm font-medium rounded hover:bg-muted transition-colors">
+              Notes
+            </Link>
+            <Link href="/portfolio" className="px-3 py-2 text-sm font-medium rounded bg-muted">
+              Portfolio
+            </Link>
+            <Link href="/screener" className="px-3 py-2 text-sm font-medium rounded hover:bg-muted transition-colors">
+              Screener
+            </Link>
+            <Link href="/markets" className="px-3 py-2 text-sm font-medium rounded hover:bg-muted transition-colors">
+              Markets
+            </Link>
+          </nav>
+
+          <div className="mt-auto space-y-2">
+            <Button variant="ghost" className="w-full justify-start">
+              Sign In
+            </Button>
+            <Button className="w-full">Get Started</Button>
+          </div>
+        </aside>
+
+        <SentryErrorBoundary name="add-holding-dialog">
+          <AddHoldingDialog open={showAddHolding} onOpenChange={setShowAddHolding} onAdd={handleAddHolding} />
+        </SentryErrorBoundary>
+        <SentryErrorBoundary name="add-watchlist-dialog">
+          <AddWatchlistDialog open={showAddWatchlist} onOpenChange={setShowAddWatchlist} onAdd={handleAddWatchlist} />
+        </SentryErrorBoundary>
       </div>
-
-      {/* Right Sidebar Navigation */}
-      <aside className="w-64 border-l bg-background p-6 flex flex-col gap-6">
-        <div className="font-bold text-lg">Datax Market Research</div>
-
-        <nav className="flex flex-col gap-2">
-          <Link href="/" className="px-3 py-2 text-sm font-medium rounded hover:bg-muted transition-colors">
-            AI Chat
-          </Link>
-          <Link href="/notes" className="px-3 py-2 text-sm font-medium rounded hover:bg-muted transition-colors">
-            Notes
-          </Link>
-          <Link href="/portfolio" className="px-3 py-2 text-sm font-medium rounded bg-muted">
-            Portfolio
-          </Link>
-          <Link href="/screener" className="px-3 py-2 text-sm font-medium rounded hover:bg-muted transition-colors">
-            Screener
-          </Link>
-          <Link href="/markets" className="px-3 py-2 text-sm font-medium rounded hover:bg-muted transition-colors">
-            Markets
-          </Link>
-        </nav>
-
-        <div className="mt-auto space-y-2">
-          <Button variant="ghost" className="w-full justify-start">
-            Sign In
-          </Button>
-          <Button className="w-full">Get Started</Button>
-        </div>
-      </aside>
-
-      <AddHoldingDialog open={showAddHolding} onOpenChange={setShowAddHolding} onAdd={handleAddHolding} />
-      <AddWatchlistDialog open={showAddWatchlist} onOpenChange={setShowAddWatchlist} onAdd={handleAddWatchlist} />
-    </div>
+    </SentryErrorBoundary>
   )
 }

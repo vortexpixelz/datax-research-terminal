@@ -1,7 +1,10 @@
+import "../sentry.server.config"
 import type React from "react"
 import type { Metadata } from "next"
 import { Inter, JetBrains_Mono } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
+import { SentryInit } from "@/components/sentry-init"
+import { SentryErrorBoundary } from "@/components/sentry-error-boundary"
 import "./globals.css"
 
 const inter = Inter({ subsets: ["latin"] })
@@ -39,7 +42,10 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className={`font-sans antialiased`}>
-        {children}
+        <SentryInit />
+        <SentryErrorBoundary name="root-layout">
+          {children}
+        </SentryErrorBoundary>
         <Analytics />
       </body>
     </html>

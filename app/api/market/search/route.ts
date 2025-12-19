@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
+import * as Sentry from "@sentry/nextjs"
 
-export async function GET(request: NextRequest) {
+async function handler(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
   const query = searchParams.get("q")
 
@@ -38,11 +39,14 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ results: results || [] })
   } catch (error) {
     console.error("[v0] Error searching tickers:", error)
+    Sentry.captureException(error)
     return NextResponse.json({
       results: getMockSearchResults(query),
     })
   }
 }
+
+export const GET = Sentry.wrapRouteHandlerWithSentry(handler, "/api/market/search")
 
 function getMockSearchResults(query: string): any[] {
   const mockTickers = [

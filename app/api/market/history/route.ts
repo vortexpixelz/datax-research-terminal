@@ -1,7 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server"
+import * as Sentry from "@sentry/nextjs"
 import { getHistoricalData } from "@/lib/api/polygon"
 
-export async function GET(request: NextRequest) {
+async function handler(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
   const symbol = searchParams.get("symbol")
   const from = searchParams.get("from")
@@ -18,6 +19,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(history)
   } catch (error) {
     console.error("[v0] Error in history API:", error)
+    Sentry.captureException(error)
     return NextResponse.json({ error: "Failed to fetch historical data" }, { status: 500 })
   }
 }
+
+export const GET = Sentry.wrapRouteHandlerWithSentry(handler, "/api/market/history")

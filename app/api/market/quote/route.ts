@@ -1,7 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server"
+import * as Sentry from "@sentry/nextjs"
 import { getQuote } from "@/lib/api/polygon"
 
-export async function GET(request: NextRequest) {
+async function handler(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
   const symbol = searchParams.get("symbol")
 
@@ -19,6 +20,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(quote)
   } catch (error) {
     console.error("[v0] Error in quote API:", error)
+    Sentry.captureException(error)
     return NextResponse.json({ error: "Failed to fetch quote" }, { status: 500 })
   }
 }
+
+export const GET = Sentry.wrapRouteHandlerWithSentry(handler, "/api/market/quote")

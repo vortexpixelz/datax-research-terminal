@@ -2,6 +2,7 @@
 // Streams updates to clients via Server-Sent Events (SSE)
 
 import type { NextRequest } from "next/server"
+import * as Sentry from "@sentry/nextjs"
 
 const encoder = new TextEncoder()
 
@@ -48,6 +49,7 @@ function connectToPolygon() {
           controller.enqueue(encoder.encode(payload))
         } catch (error) {
           console.error("[v0] Error sending to subscriber:", error)
+          Sentry.captureException(error)
         }
       })
     })
@@ -55,6 +57,7 @@ function connectToPolygon() {
 
   polygonWs.on("error", (error: any) => {
     console.error("[v0] Polygon WebSocket error:", error)
+    Sentry.captureException(error)
   })
 
   polygonWs.on("close", () => {
@@ -64,7 +67,7 @@ function connectToPolygon() {
   })
 }
 
-export async function GET(request: NextRequest) {
+async function handler(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
   const tickers = searchParams.get("tickers")?.split(",") || []
 
@@ -112,3 +115,5 @@ export async function GET(request: NextRequest) {
     },
   })
 }
+
+export const GET = Sentry.wrapRouteHandlerWithSentry(handler, "/api/market/stream")

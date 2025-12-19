@@ -47,6 +47,11 @@ POLYGON_API_KEY=your_polygon_api_key
 
 # App URL (for API calls)
 NEXT_PUBLIC_APP_URL=http://localhost:3000
+# Sentry (error monitoring)
+SENTRY_DSN=your_server_dsn
+SENTRY_ENVIRONMENT=development
+NEXT_PUBLIC_SENTRY_DSN=your_browser_dsn
+NEXT_PUBLIC_SENTRY_ENVIRONMENT=development
 \`\`\`
 
 ### 3. Run Development Server
@@ -90,4 +95,5 @@ To change the AI model used for chat:
 
 ## Support
 
-For issues or questions, check the documentation or create an issue.
+For issues or questions, check the documentation or create an issue. Monitoring guidance and sample Sentry dashboards are
+available in [`docs/monitoring.md`](docs/monitoring.md).

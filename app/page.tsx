@@ -3,6 +3,7 @@
 import type React from "react"
 import { TickerSearch } from "@/components/ticker-search"
 import { MarketEventsFeed } from "@/components/market-events-feed"
+import { SentryErrorBoundary } from "@/components/sentry-error-boundary"
 import { useChat } from "@ai-sdk/react"
 import { DefaultChatTransport } from "ai"
 import { Send } from "lucide-react"
@@ -38,15 +39,18 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="flex h-screen">
-      {/* Main Chat Area - Center */}
-      <div className="flex-1 flex flex-col">
+    <SentryErrorBoundary name="chat-page">
+      <div className="flex h-screen">
+        {/* Main Chat Area - Center */}
+        <div className="flex-1 flex flex-col">
         <div className="border-b bg-card p-2.5">
-          <TickerSearch
-            onSelectTicker={(symbol) => {
-              sendMessage({ text: `Tell me about ${symbol}` })
-            }}
-          />
+          <SentryErrorBoundary name="ticker-search">
+            <TickerSearch
+              onSelectTicker={(symbol) => {
+                sendMessage({ text: `Tell me about ${symbol}` })
+              }}
+            />
+          </SentryErrorBoundary>
         </div>
 
         {/* Chat Messages */}
@@ -232,7 +236,9 @@ export default function ChatPage() {
         </nav>
 
         <div className="flex-1 overflow-y-auto p-2.5 border-t">
-          <MarketEventsFeed />
+          <SentryErrorBoundary name="market-events-feed-panel">
+            <MarketEventsFeed />
+          </SentryErrorBoundary>
         </div>
 
         <div className="mt-auto p-2.5 border-t space-y-1.5">
@@ -247,7 +253,8 @@ export default function ChatPage() {
             </div>
           </div>
         </div>
-      </aside>
-    </div>
+        </aside>
+      </div>
+    </SentryErrorBoundary>
   )
 }
