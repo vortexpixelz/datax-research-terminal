@@ -51,13 +51,13 @@ export function MarketInsights() {
   const getIcon = (type: MarketInsight["type"]) => {
     switch (type) {
       case "trend":
-        return <TrendingUp className="w-4 h-4" />
+        return <TrendingUp className="w-4 h-4" aria-hidden="true" />
       case "alert":
-        return <AlertCircle className="w-4 h-4" />
+        return <AlertCircle className="w-4 h-4" aria-hidden="true" />
       case "volume":
-        return <DollarSign className="w-4 h-4" />
+        return <DollarSign className="w-4 h-4" aria-hidden="true" />
       case "sentiment":
-        return <Activity className="w-4 h-4" />
+        return <Activity className="w-4 h-4" aria-hidden="true" />
     }
   }
 
@@ -91,9 +91,9 @@ export function MarketInsights() {
         <h2 className="text-xs font-bold text-primary uppercase tracking-wider">MARKET INSIGHTS</h2>
       </div>
 
-      <div className="divide-y max-h-96 overflow-y-auto">
+      <ul className="divide-y max-h-96 overflow-y-auto" aria-label="Latest market insights">
         {insights.map((insight, idx) => (
-          <div key={idx} className="p-3 hover:bg-muted/50 transition-colors">
+          <li key={idx} className="p-3 hover:bg-muted/50 transition-colors">
             <div className="flex items-start gap-3">
               <div className={`mt-0.5 ${getTypeColor(insight.type)}`}>{getIcon(insight.type)}</div>
               <div className="flex-1 min-w-0">
@@ -105,9 +105,9 @@ export function MarketInsights() {
                 <div className="text-xs text-muted-foreground/60">{formatTimestamp(insight.timestamp)}</div>
               </div>
             </div>
-          </div>
+          </li>
         ))}
-      </div>
+      </ul>
     </div>
   )
 }

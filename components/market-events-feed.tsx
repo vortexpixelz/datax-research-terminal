@@ -54,11 +54,11 @@ export function MarketEventsFeed() {
   const getIcon = (type: MarketEvent["type"]) => {
     switch (type) {
       case "price_alert":
-        return <TrendingUp className="h-3.5 w-3.5" />
+        return <TrendingUp className="h-3.5 w-3.5" aria-hidden="true" />
       case "volume_spike":
-        return <AlertTriangle className="h-3.5 w-3.5" />
+        return <AlertTriangle className="h-3.5 w-3.5" aria-hidden="true" />
       case "news":
-        return <Newspaper className="h-3.5 w-3.5" />
+        return <Newspaper className="h-3.5 w-3.5" aria-hidden="true" />
       default:
         return null
     }
@@ -87,16 +87,18 @@ export function MarketEventsFeed() {
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <h3 className="text-xs font-bold text-primary uppercase tracking-wider">MARKET EVENTS</h3>
-        <div className="text-xs text-muted-foreground">LIVE</div>
+        <h2 className="text-xs font-bold text-primary uppercase tracking-wider">MARKET EVENTS</h2>
+        <div className="text-xs text-muted-foreground" aria-live="polite">
+          LIVE
+        </div>
       </div>
 
-      <div className="space-y-1 max-h-96 overflow-y-auto">
+      <ul className="space-y-1 max-h-96 overflow-y-auto" aria-label="Recent market events">
         {events.length === 0 ? (
-          <div className="p-3 text-xs text-muted-foreground bg-card border">NO EVENTS</div>
+          <li className="p-3 text-xs text-muted-foreground bg-card border">NO EVENTS</li>
         ) : (
           events.map((event) => (
-            <div key={event.id} className="bg-card border p-2.5 hover:bg-sidebar-accent transition-colors">
+            <li key={event.id} className="bg-card border p-2.5 hover:bg-sidebar-accent transition-colors">
               <div className="flex items-start gap-2">
                 <div className={getSeverityColor(event.severity)}>{getIcon(event.type)}</div>
                 <div className="flex-1 min-w-0">
@@ -108,10 +110,10 @@ export function MarketEventsFeed() {
                   <div className="text-xs text-muted-foreground mt-0.5">{event.description}</div>
                 </div>
               </div>
-            </div>
+            </li>
           ))
         )}
-      </div>
+      </ul>
     </div>
   )
 }

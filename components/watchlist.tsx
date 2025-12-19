@@ -12,15 +12,30 @@ type WatchlistProps = {
 export function Watchlist({ items, onRemove }: WatchlistProps) {
   return (
     <div className="bg-card border rounded-lg overflow-hidden">
-      <table className="w-full">
+      <table className="w-full" aria-describedby="watchlist-caption">
+        <caption id="watchlist-caption" className="sr-only">
+          Watchlist items with price performance details
+        </caption>
         <thead className="bg-muted">
           <tr>
-            <th className="text-left p-4 font-medium">Ticker</th>
-            <th className="text-left p-4 font-medium">Name</th>
-            <th className="text-right p-4 font-medium">Price</th>
-            <th className="text-right p-4 font-medium">Change</th>
-            <th className="text-right p-4 font-medium">Change %</th>
-            <th className="text-right p-4 font-medium"></th>
+            <th scope="col" className="text-left p-4 font-medium">
+              Ticker
+            </th>
+            <th scope="col" className="text-left p-4 font-medium">
+              Name
+            </th>
+            <th scope="col" className="text-right p-4 font-medium">
+              Price
+            </th>
+            <th scope="col" className="text-right p-4 font-medium">
+              Change
+            </th>
+            <th scope="col" className="text-right p-4 font-medium">
+              Change %
+            </th>
+            <th scope="col" className="text-right p-4 font-medium">
+              <span className="sr-only">Actions</span>
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -34,14 +49,24 @@ export function Watchlist({ items, onRemove }: WatchlistProps) {
               </td>
               <td className={`p-4 text-right ${item.changePercent >= 0 ? "text-green-600" : "text-red-600"}`}>
                 <div className="flex items-center justify-end gap-1">
-                  {item.changePercent >= 0 ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
+                  {item.changePercent >= 0 ? (
+                    <TrendingUp className="h-4 w-4" aria-hidden="true" />
+                  ) : (
+                    <TrendingDown className="h-4 w-4" aria-hidden="true" />
+                  )}
                   {item.changePercent >= 0 ? "+" : ""}
                   {item.changePercent.toFixed(2)}%
                 </div>
               </td>
               <td className="p-4 text-right">
-                <Button variant="ghost" size="icon" onClick={() => onRemove(item.id)}>
-                  <Trash2 className="h-4 w-4" />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  type="button"
+                  onClick={() => onRemove(item.id)}
+                  aria-label={`Remove ${item.ticker} from watchlist`}
+                >
+                  <Trash2 className="h-4 w-4" aria-hidden="true" />
                 </Button>
               </td>
             </tr>

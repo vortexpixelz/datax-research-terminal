@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Line } from "react-chartjs-2"
 import {
   Chart as ChartJS,
@@ -23,6 +23,7 @@ type StockChartProps = {
 export function StockChart({ ticker }: StockChartProps) {
   const [data, setData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const descriptionId = useMemo(() => `stock-chart-description-${ticker.toLowerCase()}`, [ticker])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -70,7 +71,7 @@ export function StockChart({ ticker }: StockChartProps) {
 
   if (!data) {
     return (
-      <div className="h-[400px] flex items-center justify-center text-muted-foreground">
+      <div className="h-[400px] flex items-center justify-center text-muted-foreground" role="status" aria-live="polite">
         No data available for {ticker}
       </div>
     )
@@ -116,7 +117,10 @@ export function StockChart({ ticker }: StockChartProps) {
 
   return (
     <div className="h-[400px]">
-      <Line data={data} options={options} />
+      <p id={descriptionId} className="sr-only">
+        Line chart showing the last 30 days of closing prices for {ticker}.
+      </p>
+      <Line data={data} options={options} role="img" aria-label={`${ticker} price history`} aria-describedby={descriptionId} />
     </div>
   )
 }

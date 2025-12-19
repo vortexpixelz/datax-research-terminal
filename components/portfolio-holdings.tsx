@@ -12,18 +12,39 @@ type PortfolioHoldingsProps = {
 export function PortfolioHoldings({ holdings, onRemove }: PortfolioHoldingsProps) {
   return (
     <div className="bg-card border rounded-lg overflow-hidden">
-      <table className="w-full">
+      <table className="w-full" aria-describedby="portfolio-holdings-caption">
+        <caption id="portfolio-holdings-caption" className="sr-only">
+          Portfolio holdings with current performance metrics
+        </caption>
         <thead className="bg-muted">
           <tr>
-            <th className="text-left p-4 font-medium">Ticker</th>
-            <th className="text-left p-4 font-medium">Name</th>
-            <th className="text-right p-4 font-medium">Shares</th>
-            <th className="text-right p-4 font-medium">Avg Cost</th>
-            <th className="text-right p-4 font-medium">Current Price</th>
-            <th className="text-right p-4 font-medium">Market Value</th>
-            <th className="text-right p-4 font-medium">Gain/Loss</th>
-            <th className="text-right p-4 font-medium">Return %</th>
-            <th className="text-right p-4 font-medium"></th>
+            <th scope="col" className="text-left p-4 font-medium">
+              Ticker
+            </th>
+            <th scope="col" className="text-left p-4 font-medium">
+              Name
+            </th>
+            <th scope="col" className="text-right p-4 font-medium">
+              Shares
+            </th>
+            <th scope="col" className="text-right p-4 font-medium">
+              Avg Cost
+            </th>
+            <th scope="col" className="text-right p-4 font-medium">
+              Current Price
+            </th>
+            <th scope="col" className="text-right p-4 font-medium">
+              Market Value
+            </th>
+            <th scope="col" className="text-right p-4 font-medium">
+              Gain/Loss
+            </th>
+            <th scope="col" className="text-right p-4 font-medium">
+              Return %
+            </th>
+            <th scope="col" className="text-right p-4 font-medium">
+              <span className="sr-only">Actions</span>
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -49,8 +70,14 @@ export function PortfolioHoldings({ holdings, onRemove }: PortfolioHoldingsProps
                   {gainPercent.toFixed(2)}%
                 </td>
                 <td className="p-4 text-right">
-                  <Button variant="ghost" size="icon" onClick={() => onRemove(holding.id)}>
-                    <Trash2 className="h-4 w-4" />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    type="button"
+                    onClick={() => onRemove(holding.id)}
+                    aria-label={`Remove ${holding.ticker} from portfolio`}
+                  >
+                    <Trash2 className="h-4 w-4" aria-hidden="true" />
                   </Button>
                 </td>
               </tr>

@@ -159,6 +159,7 @@ export default function ChatPage() {
                 name="message"
                 placeholder="ENTER QUERY: Type your market research question..."
                 className="min-h-[50px] max-h-[150px] resize-none text-sm bg-background"
+                aria-label="Message"
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault()
@@ -176,7 +177,8 @@ export default function ChatPage() {
                 className="h-[50px] w-[50px] bg-primary hover:bg-primary/90"
                 disabled={status === "in_progress"}
               >
-                <Send className="h-4 w-4" />
+                <Send className="h-4 w-4" aria-hidden="true" />
+                <span className="sr-only">Send message</span>
               </Button>
             </form>
             <p className="text-xs text-muted-foreground mt-1 uppercase tracking-wide">
@@ -195,6 +197,7 @@ export default function ChatPage() {
         <nav className="flex flex-col p-1.5 gap-0.5">
           <Link
             href="/"
+            aria-current="page"
             className="px-2.5 py-1.5 text-xs font-medium uppercase tracking-wider bg-primary text-primary-foreground"
           >
             AI Chat

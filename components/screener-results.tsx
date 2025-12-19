@@ -52,7 +52,11 @@ export function ScreenerResults({ stocks }: ScreenerResultsProps) {
   }
 
   const SortButton = ({ label, sortKey: key }: { label: string; sortKey: SortKey }) => (
-    <button onClick={() => handleSort(key)} className="font-medium hover:text-foreground transition-colors">
+    <button
+      type="button"
+      onClick={() => handleSort(key)}
+      className="font-medium hover:text-foreground transition-colors"
+    >
       {label} {sortKey === key && (sortDirection === "asc" ? "↑" : "↓")}
     </button>
   )
@@ -68,34 +72,39 @@ export function ScreenerResults({ stocks }: ScreenerResultsProps) {
   return (
     <div className="bg-card border rounded-lg overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="w-full">
+        <table className="w-full" aria-describedby="screener-results-caption">
+          <caption id="screener-results-caption" className="sr-only">
+            Screener results matching the selected filters
+          </caption>
           <thead className="bg-muted">
             <tr>
-              <th className="text-left p-4">
+              <th scope="col" className="text-left p-4">
                 <SortButton label="Ticker" sortKey="ticker" />
               </th>
-              <th className="text-left p-4">
+              <th scope="col" className="text-left p-4">
                 <SortButton label="Name" sortKey="name" />
               </th>
-              <th className="text-right p-4">
+              <th scope="col" className="text-right p-4">
                 <SortButton label="Price" sortKey="price" />
               </th>
-              <th className="text-right p-4">
+              <th scope="col" className="text-right p-4">
                 <SortButton label="Change %" sortKey="changePercent" />
               </th>
-              <th className="text-right p-4">
+              <th scope="col" className="text-right p-4">
                 <SortButton label="Market Cap" sortKey="marketCap" />
               </th>
-              <th className="text-right p-4">
+              <th scope="col" className="text-right p-4">
                 <SortButton label="P/E" sortKey="pe" />
               </th>
-              <th className="text-right p-4">
+              <th scope="col" className="text-right p-4">
                 <SortButton label="Volume" sortKey="volume" />
               </th>
-              <th className="text-left p-4">
+              <th scope="col" className="text-left p-4">
                 <SortButton label="Sector" sortKey="sector" />
               </th>
-              <th className="text-right p-4"></th>
+              <th scope="col" className="text-right p-4">
+                <span className="sr-only">Actions</span>
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -107,9 +116,9 @@ export function ScreenerResults({ stocks }: ScreenerResultsProps) {
                 <td className={`p-4 text-right ${stock.changePercent >= 0 ? "text-green-600" : "text-red-600"}`}>
                   <div className="flex items-center justify-end gap-1">
                     {stock.changePercent >= 0 ? (
-                      <TrendingUp className="h-4 w-4" />
+                      <TrendingUp className="h-4 w-4" aria-hidden="true" />
                     ) : (
-                      <TrendingDown className="h-4 w-4" />
+                      <TrendingDown className="h-4 w-4" aria-hidden="true" />
                     )}
                     {stock.changePercent >= 0 ? "+" : ""}
                     {stock.changePercent.toFixed(2)}%

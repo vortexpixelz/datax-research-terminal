@@ -65,6 +65,8 @@ export function NoteEditor({ note, notes, onUpdate, onDelete, onNavigate }: Note
           key={match.index}
           onClick={() => linkedNote && onNavigate(linkedNote.id)}
           className="text-primary underline hover:text-primary/80 cursor-pointer"
+          type="button"
+          aria-label={linkedNote ? `Open linked note ${linkedTitle}` : `Linked note ${linkedTitle} not found`}
         >
           {linkedTitle}
         </button>,
@@ -89,6 +91,7 @@ export function NoteEditor({ note, notes, onUpdate, onDelete, onNavigate }: Note
             onChange={(e) => handleTitleChange(e.target.value)}
             className="text-2xl font-semibold border-0 px-0 focus-visible:ring-0"
             placeholder="Note title..."
+            aria-label="Note title"
           />
           <Button
             variant="ghost"
@@ -98,19 +101,24 @@ export function NoteEditor({ note, notes, onUpdate, onDelete, onNavigate }: Note
                 onDelete(note.id)
               }
             }}
+            type="button"
+            aria-label="Delete note"
           >
-            <Trash2 className="h-4 w-4" />
+            <Trash2 className="h-4 w-4" aria-hidden="true" />
+            <span className="sr-only">Delete note</span>
           </Button>
         </div>
 
         <div className="flex items-center gap-2">
-          <Tag className="h-4 w-4 text-muted-foreground" />
+          <Tag className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
           <div className="flex flex-wrap gap-2">
             {note.tags.map((tag) => (
               <button
                 key={tag}
                 onClick={() => handleRemoveTag(tag)}
                 className="text-xs px-2 py-1 bg-primary/10 text-primary rounded hover:bg-primary/20"
+                type="button"
+                aria-label={`Remove tag ${tag}`}
               >
                 {tag} ×
               </button>
@@ -127,6 +135,7 @@ export function NoteEditor({ note, notes, onUpdate, onDelete, onNavigate }: Note
                 onChange={(e) => setTagInput(e.target.value)}
                 placeholder="Add tag..."
                 className="h-6 text-xs w-24"
+                aria-label="Add a tag"
               />
             </form>
           </div>
@@ -140,6 +149,7 @@ export function NoteEditor({ note, notes, onUpdate, onDelete, onNavigate }: Note
               onChange={(e) => handleContentChange(e.target.value)}
               className="min-h-[500px] font-mono text-sm"
               placeholder="Write your note... Use [[Note Title]] to link to other notes."
+              aria-label="Note content"
             />
             <p className="text-xs text-muted-foreground mt-2">
               Use [[Note Title]] syntax to create bidirectional links

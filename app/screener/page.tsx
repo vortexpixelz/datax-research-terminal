@@ -181,7 +181,7 @@ export default function ScreenerPage() {
   return (
     <div className="flex h-screen">
       {/* Left Sidebar - Filters */}
-      <aside className="w-80 border-r bg-background overflow-y-auto">
+      <aside className="w-80 border-r bg-background overflow-y-auto" aria-label="Screener filters">
         <div className="p-6 space-y-6">
           <div>
             <h2 className="text-xl font-semibold mb-2">Stock Screener</h2>
@@ -191,7 +191,10 @@ export default function ScreenerPage() {
           <div>
             <Label>Search</Label>
             <div className="relative mt-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Search
+                aria-hidden="true"
+                className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"
+              />
               <Input
                 placeholder="Ticker or company name"
                 className="pl-9"
@@ -207,8 +210,9 @@ export default function ScreenerPage() {
             <Button onClick={handleReset} variant="outline" className="flex-1 bg-transparent">
               Reset
             </Button>
-            <Button variant="outline" size="icon">
-              <Save className="h-4 w-4" />
+            <Button variant="outline" size="icon" aria-label="Save screen">
+              <Save className="h-4 w-4" aria-hidden="true" />
+              <span className="sr-only">Save screen</span>
             </Button>
           </div>
         </div>
@@ -233,7 +237,7 @@ export default function ScreenerPage() {
       </div>
 
       {/* Right Sidebar Navigation */}
-      <aside className="w-64 border-l bg-background p-6 flex flex-col gap-6">
+      <aside className="w-64 border-l bg-background p-6 flex flex-col gap-6" aria-label="Screener navigation">
         <div className="font-bold text-lg">Datax Market Research</div>
 
         <nav className="flex flex-col gap-2">
@@ -246,7 +250,11 @@ export default function ScreenerPage() {
           <Link href="/portfolio" className="px-3 py-2 text-sm font-medium rounded hover:bg-muted transition-colors">
             Portfolio
           </Link>
-          <Link href="/screener" className="px-3 py-2 text-sm font-medium rounded bg-muted">
+          <Link
+            href="/screener"
+            aria-current="page"
+            className="px-3 py-2 text-sm font-medium rounded bg-muted"
+          >
             Screener
           </Link>
           <Link href="/markets" className="px-3 py-2 text-sm font-medium rounded hover:bg-muted transition-colors">

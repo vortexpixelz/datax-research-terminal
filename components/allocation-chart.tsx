@@ -1,5 +1,6 @@
 "use client"
 
+import { useId } from "react"
 import { Pie } from "react-chartjs-2"
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js"
 import type { Holding } from "@/app/portfolio/page"
@@ -11,6 +12,7 @@ type AllocationChartProps = {
 }
 
 export function AllocationChart({ holdings }: AllocationChartProps) {
+  const descriptionId = useId()
   const sectorAllocations = holdings.reduce(
     (acc, holding) => {
       const value = holding.shares * holding.currentPrice
@@ -66,11 +68,24 @@ export function AllocationChart({ holdings }: AllocationChartProps) {
     },
   }
 
+  const summary = Object.entries(sectorAllocations)
+    .map(([sector, value]) => `${sector}: $${value.toFixed(2)}`)
+    .join("; ")
+
   return (
     <div className="bg-card border rounded-lg p-6">
       <h3 className="text-lg font-semibold mb-4">Sector Allocation</h3>
       <div className="h-[400px]">
-        <Pie data={data} options={options} />
+        <p id={descriptionId} className="sr-only">
+          Portfolio allocation by sector. {summary || "No holdings available"}.
+        </p>
+        <Pie
+          data={data}
+          options={options}
+          role="img"
+          aria-label="Portfolio allocation by sector"
+          aria-describedby={descriptionId}
+        />
       </div>
     </div>
   )

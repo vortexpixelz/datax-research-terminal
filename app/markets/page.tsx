@@ -40,6 +40,7 @@ export default function MarketsPage() {
                 onChange={(e) => setTickerInput(e.target.value)}
                 placeholder="TICKER SYMBOL"
                 className="w-32 h-8 text-xs uppercase bg-background"
+                aria-label="Ticker symbol"
               />
               <Button type="submit" size="sm" className="h-8 text-xs bg-primary hover:bg-primary/90">
                 LOAD
@@ -111,6 +112,7 @@ export default function MarketsPage() {
           </Link>
           <Link
             href="/markets"
+            aria-current="page"
             className="px-3 py-2 text-xs font-medium uppercase tracking-wider bg-primary text-primary-foreground"
           >
             Markets

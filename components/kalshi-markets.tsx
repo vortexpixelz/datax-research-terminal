@@ -42,14 +42,16 @@ export function KalshiMarkets() {
       <div className="border-b px-4 py-2 bg-muted">
         <div className="flex items-center justify-between">
           <h2 className="text-xs font-bold text-primary uppercase tracking-wider">PREDICTION MARKETS - KALSHI</h2>
-          <div className="flex gap-2">
+          <div className="flex gap-2" role="group" aria-label="Filter markets by category">
             {categories.map((cat) => (
               <button
                 key={cat}
+                type="button"
                 onClick={() => setSelectedCategory(cat)}
                 className={`px-2 py-1 text-xs uppercase tracking-wider transition-colors ${
                   selectedCategory === cat ? "bg-primary text-primary-foreground" : "hover:bg-muted-foreground/10"
                 }`}
+                aria-pressed={selectedCategory === cat}
               >
                 {cat}
               </button>
@@ -58,14 +60,14 @@ export function KalshiMarkets() {
         </div>
       </div>
 
-      <div className="divide-y">
+      <ul className="divide-y" aria-live="polite" aria-label="Kalshi market opportunities">
         {filteredMarkets.map((market) => {
           const isLikely = market.yes_price > 0.5
           const probability = market.yes_price
           const priceChange = Math.random() > 0.5 // Mock change direction
 
           return (
-            <div key={market.ticker} className="p-3 hover:bg-muted/50 transition-colors cursor-pointer">
+            <li key={market.ticker} className="p-3 hover:bg-muted/50 transition-colors cursor-pointer">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
@@ -88,9 +90,9 @@ export function KalshiMarkets() {
                       {formatProbability(probability)}
                     </span>
                     {priceChange ? (
-                      <TrendingUp className="w-4 h-4 text-success" />
+                      <TrendingUp className="w-4 h-4 text-success" aria-hidden="true" />
                     ) : (
-                      <TrendingDown className="w-4 h-4 text-destructive" />
+                      <TrendingDown className="w-4 h-4 text-destructive" aria-hidden="true" />
                     )}
                   </div>
                   <div className="text-xs text-muted-foreground uppercase">{isLikely ? "LIKELY YES" : "LIKELY NO"}</div>
@@ -106,10 +108,10 @@ export function KalshiMarkets() {
                   </div>
                 </div>
               </div>
-            </div>
+            </li>
           )
         })}
-      </div>
+      </ul>
     </div>
   )
 }

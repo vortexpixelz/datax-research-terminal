@@ -162,7 +162,11 @@ export default function PortfolioPage() {
           <Link href="/notes" className="px-3 py-2 text-sm font-medium rounded hover:bg-muted transition-colors">
             Notes
           </Link>
-          <Link href="/portfolio" className="px-3 py-2 text-sm font-medium rounded bg-muted">
+          <Link
+            href="/portfolio"
+            aria-current="page"
+            className="px-3 py-2 text-sm font-medium rounded bg-muted"
+          >
             Portfolio
           </Link>
           <Link href="/screener" className="px-3 py-2 text-sm font-medium rounded hover:bg-muted transition-colors">

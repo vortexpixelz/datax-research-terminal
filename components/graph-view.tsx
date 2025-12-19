@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef } from "react"
+import { useEffect, useId, useRef } from "react"
 import type { Note } from "@/app/notes/page"
 
 type GraphViewProps = {
@@ -10,6 +10,8 @@ type GraphViewProps = {
 
 export function GraphView({ notes, onSelectNote }: GraphViewProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const descriptionId = useId()
+  const titleId = useId()
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -80,9 +82,21 @@ export function GraphView({ notes, onSelectNote }: GraphViewProps) {
 
   return (
     <div className="flex-1 relative">
-      <canvas ref={canvasRef} className="w-full h-full" style={{ width: "100%", height: "100%" }} />
+      <p id={descriptionId} className="sr-only">
+        Knowledge graph visualizing {notes.length} notes and their linked references.
+      </p>
+      <canvas
+        ref={canvasRef}
+        className="w-full h-full"
+        style={{ width: "100%", height: "100%" }}
+        role="img"
+        aria-labelledby={titleId}
+        aria-describedby={descriptionId}
+      />
       <div className="absolute top-4 left-4 bg-background border rounded-lg p-4">
-        <h3 className="font-semibold mb-2">Knowledge Graph</h3>
+        <h3 id={titleId} className="font-semibold mb-2">
+          Knowledge Graph
+        </h3>
         <p className="text-sm text-muted-foreground">{notes.length} notes with bidirectional links</p>
       </div>
     </div>

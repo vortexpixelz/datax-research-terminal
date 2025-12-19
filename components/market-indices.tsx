@@ -19,15 +19,19 @@ export function MarketIndices() {
   ])
 
   return (
-    <div className="grid grid-cols-3 gap-4">
+    <ul className="grid grid-cols-3 gap-4" aria-label="Major market indices">
       {indices.map((index) => (
-        <div key={index.symbol} className="bg-card border rounded-lg p-4">
+        <li key={index.symbol} className="bg-card border rounded-lg p-4">
           <div className="text-sm text-muted-foreground">{index.name}</div>
           <div className="text-2xl font-semibold mt-1">${index.price.toFixed(2)}</div>
           <div
             className={`flex items-center gap-1 mt-2 text-sm ${index.change >= 0 ? "text-green-600" : "text-red-600"}`}
           >
-            {index.change >= 0 ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
+            {index.change >= 0 ? (
+              <TrendingUp className="h-4 w-4" aria-hidden="true" />
+            ) : (
+              <TrendingDown className="h-4 w-4" aria-hidden="true" />
+            )}
             <span>
               {index.change >= 0 ? "+" : ""}
               {index.change.toFixed(2)}
@@ -37,8 +41,8 @@ export function MarketIndices() {
               {index.changePercent.toFixed(2)}%)
             </span>
           </div>
-        </div>
+        </li>
       ))}
-    </div>
+    </ul>
   )
 }

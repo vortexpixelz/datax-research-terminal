@@ -1,5 +1,6 @@
 "use client"
 
+import { useId } from "react"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -11,6 +12,8 @@ type ScreenerFiltersProps = {
 }
 
 export function ScreenerFilters({ criteria, onCriteriaChange }: ScreenerFiltersProps) {
+  const sectorTriggerId = useId()
+  const sectorLabelId = useId()
   const updateCriteria = (key: keyof ScreenCriteria, value: any) => {
     onCriteriaChange({ ...criteria, [key]: value === "" ? undefined : value })
   }
@@ -94,12 +97,18 @@ export function ScreenerFilters({ criteria, onCriteriaChange }: ScreenerFiltersP
       </div>
 
       <div>
-        <Label>Sector</Label>
+        <Label id={sectorLabelId} htmlFor={sectorTriggerId}>
+          Sector
+        </Label>
         <Select
           value={criteria.sector ?? "all"}
           onValueChange={(value) => updateCriteria("sector", value === "all" ? "" : value)}
         >
-          <SelectTrigger className="mt-1">
+          <SelectTrigger
+            id={sectorTriggerId}
+            className="mt-1"
+            aria-labelledby={`${sectorLabelId} ${sectorTriggerId}`}
+          >
             <SelectValue placeholder="All sectors" />
           </SelectTrigger>
           <SelectContent>

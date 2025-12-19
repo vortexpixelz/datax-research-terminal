@@ -1,9 +1,10 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useId } from "react"
 import { Plus, Search, FileText, Network } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import Link from "next/link"
 import { NoteEditor } from "@/components/note-editor"
 import { NoteList } from "@/components/note-list"
@@ -41,6 +42,7 @@ export default function NotesPage() {
   const [selectedNoteId, setSelectedNoteId] = useState<string | null>(notes[0]?.id || null)
   const [searchQuery, setSearchQuery] = useState("")
   const [viewMode, setViewMode] = useState<"editor" | "graph">("editor")
+  const searchInputId = useId()
 
   const selectedNote = notes.find((n) => n.id === selectedNoteId)
 
@@ -82,7 +84,7 @@ export default function NotesPage() {
   return (
     <div className="flex h-screen">
       {/* Left Sidebar - Notes List */}
-      <aside className="w-80 border-r bg-background flex flex-col">
+      <aside className="w-80 border-r bg-background flex flex-col" aria-label="Notes library">
         <div className="p-4 border-b space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="font-semibold">Notes</h2>
@@ -92,8 +94,15 @@ export default function NotesPage() {
             </Button>
           </div>
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Label htmlFor={searchInputId} className="sr-only">
+              Search notes
+            </Label>
+            <Search
+              aria-hidden="true"
+              className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"
+            />
             <Input
+              id={searchInputId}
               placeholder="Search notes..."
               className="pl-9"
               value={searchQuery}
@@ -150,14 +159,14 @@ export default function NotesPage() {
       </div>
 
       {/* Right Sidebar Navigation */}
-      <aside className="w-64 border-l bg-background p-6 flex flex-col gap-6">
+      <aside className="w-64 border-l bg-background p-6 flex flex-col gap-6" aria-label="Notes navigation">
         <div className="font-bold text-lg">Datax Market Research</div>
 
         <nav className="flex flex-col gap-2">
           <Link href="/" className="px-3 py-2 text-sm font-medium rounded hover:bg-muted transition-colors">
             AI Chat
           </Link>
-          <Link href="/notes" className="px-3 py-2 text-sm font-medium rounded bg-muted">
+          <Link href="/notes" aria-current="page" className="px-3 py-2 text-sm font-medium rounded bg-muted">
             Notes
           </Link>
           <Link href="/portfolio" className="px-3 py-2 text-sm font-medium rounded hover:bg-muted transition-colors">

@@ -38,19 +38,19 @@ export function TopMovers({ type }: TopMoversProps) {
       <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
         {type === "gainers" ? (
           <>
-            <TrendingUp className="h-5 w-5 text-green-600" />
+            <TrendingUp className="h-5 w-5 text-green-600" aria-hidden="true" />
             Top Gainers
           </>
         ) : (
           <>
-            <TrendingDown className="h-5 w-5 text-red-600" />
+            <TrendingDown className="h-5 w-5 text-red-600" aria-hidden="true" />
             Top Losers
           </>
         )}
       </h3>
-      <div className="space-y-3">
+      <ul className="space-y-3">
         {movers.map((stock) => (
-          <div key={stock.ticker} className="flex items-center justify-between">
+          <li key={stock.ticker} className="flex items-center justify-between">
             <div className="flex-1">
               <div className="font-medium">{stock.ticker}</div>
               <div className="text-xs text-muted-foreground">{stock.name}</div>
@@ -62,9 +62,9 @@ export function TopMovers({ type }: TopMoversProps) {
                 {stock.changePercent.toFixed(2)}%
               </div>
             </div>
-          </div>
+          </li>
         ))}
-      </div>
+      </ul>
     </div>
   )
 }
