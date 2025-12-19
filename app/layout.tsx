@@ -2,15 +2,16 @@ import type React from "react"
 import type { Metadata } from "next"
 import { Inter, JetBrains_Mono } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
+
+import { defaultMetadata, metadataBase } from "@/lib/metadata"
 import "./globals.css"
 
 const inter = Inter({ subsets: ["latin"] })
 const jetbrainsMono = JetBrains_Mono({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Datax Market Research - AI-Powered Investment Research",
-  description:
-    "Research smarter with AI-powered insights. Chat, take notes, track portfolios, and discover opportunities.",
+  ...defaultMetadata,
+  metadataBase,
   generator: "v0.app",
   icons: {
     icon: [
