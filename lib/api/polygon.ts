@@ -37,6 +37,8 @@ export interface HistoricalBar {
   volume: number
 }
 
+export type Timespan = "minute" | "hour" | "day" | "week" | "month"
+
 // Get real-time quote for a symbol
 export async function getQuote(symbol: string): Promise<StockQuote | null> {
   const apiKey = process.env.POLYGON_API_KEY
@@ -113,18 +115,19 @@ export async function getHistoricalData(
   symbol: string,
   from: string,
   to: string,
-  timespan: "day" | "week" | "month" = "day",
+  timespan: Timespan = "day",
+  multiplier = 1,
 ): Promise<HistoricalBar[]> {
   const apiKey = process.env.POLYGON_API_KEY
 
   if (!apiKey) {
     console.log("[v0] POLYGON_API_KEY not found, returning mock data")
-    return getMockHistoricalData(symbol)
+    return getMockHistoricalData(symbol, timespan, multiplier)
   }
 
   try {
     const response = await fetch(
-      `${POLYGON_BASE_URL}/v2/aggs/ticker/${symbol}/range/1/${timespan}/${from}/${to}?apiKey=${apiKey}`,
+      `${POLYGON_BASE_URL}/v2/aggs/ticker/${symbol}/range/${multiplier}/${timespan}/${from}/${to}?adjusted=true&sort=asc&apiKey=${apiKey}`,
     )
 
     if (!response.ok) {
@@ -133,17 +136,19 @@ export async function getHistoricalData(
 
     const data = await response.json()
 
-    return data.results.map((bar: any) => ({
-      timestamp: bar.t,
-      open: bar.o,
-      high: bar.h,
-      low: bar.l,
-      close: bar.c,
-      volume: bar.v,
-    }))
+    return (data.results || [])
+      .map((bar: any) => ({
+        timestamp: bar.t,
+        open: bar.o,
+        high: bar.h,
+        low: bar.l,
+        close: bar.c,
+        volume: bar.v,
+      }))
+      .sort((a: HistoricalBar, b: HistoricalBar) => a.timestamp - b.timestamp)
   } catch (error) {
     console.error("[v0] Error fetching historical data:", error)
-    return getMockHistoricalData(symbol)
+    return getMockHistoricalData(symbol, timespan, multiplier)
   }
 }
 
@@ -180,13 +185,22 @@ function getMockStockDetails(symbol: string): StockDetails {
   }
 }
 
-function getMockHistoricalData(symbol: string): HistoricalBar[] {
+function getMockHistoricalData(symbol: string, timespan: Timespan = "day", multiplier = 1): HistoricalBar[] {
   const bars: HistoricalBar[] = []
   const now = Date.now()
   const basePrice = 100 + Math.random() * 400
 
-  for (let i = 30; i >= 0; i--) {
-    const timestamp = now - i * 24 * 60 * 60 * 1000
+  const intervalMs =
+    timespan === "minute"
+      ? multiplier * 60 * 1000
+      : timespan === "hour"
+        ? multiplier * 60 * 60 * 1000
+        : 24 * 60 * 60 * 1000
+
+  const steps = Math.max(1, timespan === "minute" ? Math.floor((6 * 60) / multiplier) : 30)
+
+  for (let i = steps; i >= 0; i--) {
+    const timestamp = now - i * intervalMs
     const open = basePrice + (Math.random() - 0.5) * 20
     const close = open + (Math.random() - 0.5) * 10
     const high = Math.max(open, close) + Math.random() * 5
@@ -198,7 +212,7 @@ function getMockHistoricalData(symbol: string): HistoricalBar[] {
       high,
       low,
       close,
-      volume: Math.floor(Math.random() * 10000000),
+      volume: Math.floor(Math.random() * 1000000),
     })
   }
 
