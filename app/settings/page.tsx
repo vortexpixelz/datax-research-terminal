@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import Link from "next/link"
 import { Save, Eye, EyeOff } from "lucide-react"
+import { useLocaleFormatter } from "@/components/locale-provider"
 
 export default function SettingsPage() {
   const [groqApiKey, setGroqApiKey] = useState("")
@@ -13,6 +14,8 @@ export default function SettingsPage() {
   const [showGroqKey, setShowGroqKey] = useState(false)
   const [showPolygonKey, setShowPolygonKey] = useState(false)
   const [saved, setSaved] = useState(false)
+  const { locale, localeOverride, setLocaleOverride } = useLocaleFormatter()
+  const [localeInput, setLocaleInput] = useState(localeOverride ?? "")
 
   useEffect(() => {
     // Load saved keys from localStorage
@@ -22,9 +25,15 @@ export default function SettingsPage() {
     setPolygonApiKey(savedPolygonKey)
   }, [])
 
+  useEffect(() => {
+    setLocaleInput(localeOverride ?? "")
+  }, [localeOverride])
+
   const handleSave = () => {
     localStorage.setItem("groq_api_key", groqApiKey)
     localStorage.setItem("polygon_api_key", polygonApiKey)
+    const normalizedLocale = localeInput.trim()
+    setLocaleOverride(normalizedLocale ? normalizedLocale : null)
     setSaved(true)
     setTimeout(() => setSaved(false), 3000)
   }
@@ -122,6 +131,25 @@ export default function SettingsPage() {
                     >
                       polygon.io
                     </a>
+                  </p>
+                </div>
+
+                {/* Locale Override */}
+                <div className="space-y-2">
+                  <Label htmlFor="locale" className="text-xs uppercase tracking-wider text-muted-foreground">
+                    Locale Override
+                  </Label>
+                  <Input
+                    id="locale"
+                    value={localeInput}
+                    onChange={(e) => setLocaleInput(e.target.value)}
+                    placeholder="e.g. en-US"
+                    className="text-xs"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Leave blank to use your browser default (
+                    <span suppressHydrationWarning>{locale}</span>
+                    ).
                   </p>
                 </div>
               </div>

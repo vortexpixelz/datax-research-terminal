@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Activity, TrendingUp, AlertCircle, DollarSign } from "lucide-react"
+import { useLocaleFormatter } from "@/components/locale-provider"
 
 interface MarketInsight {
   type: "trend" | "alert" | "volume" | "sentiment"
@@ -13,6 +14,7 @@ interface MarketInsight {
 
 export function MarketInsights() {
   const [insights, setInsights] = useState<MarketInsight[]>([])
+  const { formatDateTime } = useLocaleFormatter()
 
   useEffect(() => {
     // Mock insights - in production, this would come from analysis of market data
@@ -82,7 +84,7 @@ export function MarketInsights() {
 
     if (diffMins < 60) return `${diffMins}m ago`
     if (diffMins < 1440) return `${Math.floor(diffMins / 60)}h ago`
-    return date.toLocaleDateString()
+    return formatDateTime(date, { dateStyle: "medium" })
   }
 
   return (

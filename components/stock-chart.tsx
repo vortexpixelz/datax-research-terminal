@@ -13,6 +13,7 @@ import {
   Legend,
   Filler,
 } from "chart.js"
+import { useLocaleFormatter } from "@/components/locale-provider"
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler)
 
@@ -23,6 +24,7 @@ type StockChartProps = {
 export function StockChart({ ticker }: StockChartProps) {
   const [data, setData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const { formatDateTime, formatNumber } = useLocaleFormatter()
 
   useEffect(() => {
     const fetchData = async () => {
@@ -35,7 +37,9 @@ export function StockChart({ ticker }: StockChartProps) {
         const result = await response.json()
 
         if (result.results && result.results.length > 0) {
-          const labels = result.results.map((d: any) => new Date(d.t).toLocaleDateString())
+          const labels = result.results.map((d: any) =>
+            formatDateTime(new Date(d.t), { dateStyle: "medium" }),
+          )
           const prices = result.results.map((d: any) => d.c)
 
           setData({
@@ -62,7 +66,7 @@ export function StockChart({ ticker }: StockChartProps) {
     }
 
     fetchData()
-  }, [ticker])
+  }, [ticker, formatDateTime])
 
   if (loading) {
     return <div className="h-[400px] flex items-center justify-center text-muted-foreground">Loading chart data...</div>
@@ -103,7 +107,14 @@ export function StockChart({ ticker }: StockChartProps) {
         },
         ticks: {
           color: "hsl(var(--muted-foreground))",
-          callback: (value: any) => "$" + value.toFixed(2),
+          callback: (value: any) => {
+            const numeric = typeof value === "number" ? value : Number(value)
+            if (Number.isNaN(numeric)) {
+              return value
+            }
+
+            return `$${formatNumber(numeric, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+          },
         },
       },
     },

@@ -3,11 +3,13 @@
 import { useState, useEffect } from "react"
 import { getKalshiMarkets, formatProbability, formatVolume, type KalshiMarket } from "@/lib/api/kalshi"
 import { TrendingUp, TrendingDown } from "lucide-react"
+import { useLocaleFormatter } from "@/components/locale-provider"
 
 export function KalshiMarkets() {
   const [markets, setMarkets] = useState<KalshiMarket[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedCategory, setSelectedCategory] = useState<string>("All")
+  const { formatDateTime } = useLocaleFormatter()
 
   useEffect(() => {
     async function loadMarkets() {
@@ -78,7 +80,7 @@ export function KalshiMarkets() {
                   <div className="flex items-center gap-3 text-xs text-muted-foreground">
                     <span>Vol: {formatVolume(market.volume)}</span>
                     <span>OI: {formatVolume(market.open_interest)}</span>
-                    <span>Closes: {new Date(market.close_date).toLocaleDateString()}</span>
+                    <span>Closes: {formatDateTime(new Date(market.close_date), { dateStyle: "medium" })}</span>
                   </div>
                 </div>
 

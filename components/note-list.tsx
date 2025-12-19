@@ -2,6 +2,7 @@
 
 import { FileText, Calendar } from "lucide-react"
 import type { Note } from "@/app/notes/page"
+import { useLocaleFormatter } from "@/components/locale-provider"
 
 type NoteListProps = {
   notes: Note[]
@@ -10,6 +11,8 @@ type NoteListProps = {
 }
 
 export function NoteList({ notes, selectedNoteId, onSelectNote }: NoteListProps) {
+  const { formatDateTime } = useLocaleFormatter()
+
   if (notes.length === 0) {
     return (
       <div className="flex-1 flex items-center justify-center p-4 text-center text-muted-foreground">
@@ -35,7 +38,9 @@ export function NoteList({ notes, selectedNoteId, onSelectNote }: NoteListProps)
               <p className="text-sm text-muted-foreground line-clamp-2 mt-1">{note.content.substring(0, 100)}</p>
               <div className="flex items-center gap-2 mt-2">
                 <Calendar className="h-3 w-3 text-muted-foreground" />
-                <span className="text-xs text-muted-foreground">{note.updatedAt.toLocaleDateString()}</span>
+                <span className="text-xs text-muted-foreground">
+                  {formatDateTime(note.updatedAt, { dateStyle: "medium" })}
+                </span>
               </div>
               {note.tags.length > 0 && (
                 <div className="flex flex-wrap gap-1 mt-2">

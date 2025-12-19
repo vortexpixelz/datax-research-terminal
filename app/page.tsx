@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import Link from "next/link"
 import { useRef } from "react"
+import { useLocaleFormatter } from "@/components/locale-provider"
 
 export default function ChatPage() {
   const { messages, sendMessage, status } = useChat({
@@ -23,6 +24,7 @@ export default function ChatPage() {
   })
 
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const { formatDateTime } = useLocaleFormatter()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -111,7 +113,7 @@ export default function ChatPage() {
                       {message.role === "user" ? "[USER]" : "[AI]"}
                     </span>
                     <span className="text-xs text-muted-foreground">
-                      {new Date(message.createdAt || Date.now()).toLocaleTimeString()}
+                      {formatDateTime(message.createdAt || Date.now(), { timeStyle: "short" })}
                     </span>
                   </div>
                   <div className="space-y-1">

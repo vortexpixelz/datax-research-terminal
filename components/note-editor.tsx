@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import type { Note } from "@/app/notes/page"
+import { useLocaleFormatter } from "@/components/locale-provider"
 
 type NoteEditorProps = {
   note: Note
@@ -19,6 +20,7 @@ export function NoteEditor({ note, notes, onUpdate, onDelete, onNavigate }: Note
   const [title, setTitle] = useState(note.title)
   const [content, setContent] = useState(note.content)
   const [tagInput, setTagInput] = useState("")
+  const { formatDateTime } = useLocaleFormatter()
 
   useEffect(() => {
     setTitle(note.title)
@@ -158,7 +160,7 @@ export function NoteEditor({ note, notes, onUpdate, onDelete, onNavigate }: Note
           </div>
         </div>
 
-        <div className="text-xs text-muted-foreground">Last updated: {note.updatedAt.toLocaleString()}</div>
+        <div className="text-xs text-muted-foreground">Last updated: {formatDateTime(note.updatedAt)}</div>
       </div>
     </div>
   )

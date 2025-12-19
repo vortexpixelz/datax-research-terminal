@@ -1,4 +1,7 @@
+"use client"
+
 import { TrendingUp, TrendingDown, DollarSign, PieChartIcon } from "lucide-react"
+import { useLocaleFormatter } from "@/components/locale-provider"
 
 type PortfolioStatsProps = {
   totalValue: number
@@ -8,6 +11,13 @@ type PortfolioStatsProps = {
 }
 
 export function PortfolioStats({ totalValue, totalCost, totalGain, totalGainPercent }: PortfolioStatsProps) {
+  const { formatNumber } = useLocaleFormatter()
+  const numberOptions: Intl.NumberFormatOptions = {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }
+  const gainPrefix = totalGain >= 0 ? "+" : "-"
+
   return (
     <div className="grid grid-cols-4 gap-4">
       <div className="bg-card border rounded-lg p-4">
@@ -16,7 +26,7 @@ export function PortfolioStats({ totalValue, totalCost, totalGain, totalGainPerc
           Total Value
         </div>
         <div className="text-2xl font-semibold mt-2">
-          ${totalValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          ${formatNumber(totalValue, numberOptions)}
         </div>
       </div>
 
@@ -26,7 +36,7 @@ export function PortfolioStats({ totalValue, totalCost, totalGain, totalGainPerc
           Total Cost
         </div>
         <div className="text-2xl font-semibold mt-2">
-          ${totalCost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          ${formatNumber(totalCost, numberOptions)}
         </div>
       </div>
 
@@ -36,8 +46,7 @@ export function PortfolioStats({ totalValue, totalCost, totalGain, totalGainPerc
           Total Gain/Loss
         </div>
         <div className={`text-2xl font-semibold mt-2 ${totalGain >= 0 ? "text-green-600" : "text-red-600"}`}>
-          {totalGain >= 0 ? "+" : ""}$
-          {totalGain.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          {gainPrefix}${formatNumber(Math.abs(totalGain), numberOptions)}
         </div>
       </div>
 
