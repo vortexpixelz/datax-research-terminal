@@ -16,6 +16,10 @@ export interface MarketEvent {
 
 export function MarketEventsFeed() {
   const [events, setEvents] = useState<MarketEvent[]>([])
+  const [typeFilter, setTypeFilter] = useState<MarketEvent["type"] | "all">("all")
+  const [severityFilter, setSeverityFilter] = useState<MarketEvent["severity"] | "all">(
+    "all",
+  )
 
   useEffect(() => {
     const mockEvents: MarketEvent[] = [
@@ -84,6 +88,14 @@ export function MarketEventsFeed() {
     return `${hours}h ago`
   }
 
+  const filteredEvents = events.filter((event) => {
+    const matchesType = typeFilter === "all" || event.type === typeFilter
+    const matchesSeverity =
+      severityFilter === "all" || event.severity === severityFilter
+
+    return matchesType && matchesSeverity
+  })
+
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
@@ -91,11 +103,52 @@ export function MarketEventsFeed() {
         <div className="text-xs text-muted-foreground">LIVE</div>
       </div>
 
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+        <div className="flex flex-1 flex-col gap-1">
+          <label htmlFor="event-type-filter" className="text-xs font-medium text-muted-foreground">
+            Filter by event type
+          </label>
+          <select
+            id="event-type-filter"
+            value={typeFilter}
+            onChange={(event) => setTypeFilter(event.target.value as MarketEvent["type"] | "all")}
+            className="h-8 rounded border bg-background px-2 text-xs"
+          >
+            <option value="all">All types</option>
+            <option value="price_alert">Price alerts</option>
+            <option value="volume_spike">Volume spikes</option>
+            <option value="news">News</option>
+            <option value="trade">Trades</option>
+          </select>
+        </div>
+        <div className="flex flex-1 flex-col gap-1">
+          <label
+            htmlFor="event-severity-filter"
+            className="text-xs font-medium text-muted-foreground"
+          >
+            Filter by severity
+          </label>
+          <select
+            id="event-severity-filter"
+            value={severityFilter}
+            onChange={(event) =>
+              setSeverityFilter(event.target.value as MarketEvent["severity"] | "all")
+            }
+            className="h-8 rounded border bg-background px-2 text-xs"
+          >
+            <option value="all">All severities</option>
+            <option value="high">High</option>
+            <option value="medium">Medium</option>
+            <option value="low">Low</option>
+          </select>
+        </div>
+      </div>
+
       <div className="space-y-1 max-h-96 overflow-y-auto">
-        {events.length === 0 ? (
+        {filteredEvents.length === 0 ? (
           <div className="p-3 text-xs text-muted-foreground bg-card border">NO EVENTS</div>
         ) : (
-          events.map((event) => (
+          filteredEvents.map((event) => (
             <div key={event.id} className="bg-card border p-2.5 hover:bg-sidebar-accent transition-colors">
               <div className="flex items-start gap-2">
                 <div className={getSeverityColor(event.severity)}>{getIcon(event.type)}</div>
