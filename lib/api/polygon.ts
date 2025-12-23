@@ -1,6 +1,8 @@
 // Polygon.io API client for market data
 // API Key should be stored in environment variable: POLYGON_API_KEY
 
+import { unstable_cache } from "next/cache"
+
 const POLYGON_BASE_URL = "https://api.polygon.io"
 
 export interface StockQuote {
@@ -37,6 +39,31 @@ export interface HistoricalBar {
   volume: number
 }
 
+const fetchQuote = async (symbol: string, apiKey: string): Promise<StockQuote> => {
+  const response = await fetch(`${POLYGON_BASE_URL}/v2/aggs/ticker/${symbol}/prev?apiKey=${apiKey}`)
+
+  if (!response.ok) {
+    throw new Error(`Polygon API error: ${response.status}`)
+  }
+
+  const data = await response.json()
+
+  return {
+    symbol: data.ticker,
+    price: data.results[0].c,
+    change: data.results[0].c - data.results[0].o,
+    changePercent: ((data.results[0].c - data.results[0].o) / data.results[0].o) * 100,
+    volume: data.results[0].v,
+    high: data.results[0].h,
+    low: data.results[0].l,
+    open: data.results[0].o,
+    previousClose: data.results[0].c,
+    timestamp: data.results[0].t,
+  }
+}
+
+const cachedQuote = unstable_cache(fetchQuote, ["polygon", "quote"], { revalidate: 60 })
+
 // Get real-time quote for a symbol
 export async function getQuote(symbol: string): Promise<StockQuote | null> {
   const apiKey = process.env.POLYGON_API_KEY
@@ -47,26 +74,7 @@ export async function getQuote(symbol: string): Promise<StockQuote | null> {
   }
 
   try {
-    const response = await fetch(`${POLYGON_BASE_URL}/v2/aggs/ticker/${symbol}/prev?apiKey=${apiKey}`)
-
-    if (!response.ok) {
-      throw new Error(`Polygon API error: ${response.status}`)
-    }
-
-    const data = await response.json()
-
-    return {
-      symbol: data.ticker,
-      price: data.results[0].c,
-      change: data.results[0].c - data.results[0].o,
-      changePercent: ((data.results[0].c - data.results[0].o) / data.results[0].o) * 100,
-      volume: data.results[0].v,
-      high: data.results[0].h,
-      low: data.results[0].l,
-      open: data.results[0].o,
-      previousClose: data.results[0].c,
-      timestamp: data.results[0].t,
-    }
+    return await cachedQuote(symbol.toUpperCase(), apiKey)
   } catch (error) {
     console.error("[v0] Error fetching quote:", error)
     return getMockQuote(symbol)
@@ -74,6 +82,30 @@ export async function getQuote(symbol: string): Promise<StockQuote | null> {
 }
 
 // Get stock details
+const fetchStockDetails = async (symbol: string, apiKey: string): Promise<StockDetails> => {
+  const response = await fetch(`${POLYGON_BASE_URL}/v3/reference/tickers/${symbol}?apiKey=${apiKey}`)
+
+  if (!response.ok) {
+    throw new Error(`Polygon API error: ${response.status}`)
+  }
+
+  const data = await response.json()
+
+  return {
+    symbol: data.results.ticker,
+    name: data.results.name,
+    description: data.results.description || "",
+    marketCap: data.results.market_cap || 0,
+    sector: data.results.sic_description || "",
+    industry: data.results.sic_description || "",
+    employees: data.results.total_employees || 0,
+    ceo: data.results.ceo || "",
+    website: data.results.homepage_url || "",
+  }
+}
+
+const cachedStockDetails = unstable_cache(fetchStockDetails, ["polygon", "details"], { revalidate: 300 })
+
 export async function getStockDetails(symbol: string): Promise<StockDetails | null> {
   const apiKey = process.env.POLYGON_API_KEY
 
@@ -83,25 +115,7 @@ export async function getStockDetails(symbol: string): Promise<StockDetails | nu
   }
 
   try {
-    const response = await fetch(`${POLYGON_BASE_URL}/v3/reference/tickers/${symbol}?apiKey=${apiKey}`)
-
-    if (!response.ok) {
-      throw new Error(`Polygon API error: ${response.status}`)
-    }
-
-    const data = await response.json()
-
-    return {
-      symbol: data.results.ticker,
-      name: data.results.name,
-      description: data.results.description || "",
-      marketCap: data.results.market_cap || 0,
-      sector: data.results.sic_description || "",
-      industry: data.results.sic_description || "",
-      employees: data.results.total_employees || 0,
-      ceo: data.results.ceo || "",
-      website: data.results.homepage_url || "",
-    }
+    return await cachedStockDetails(symbol.toUpperCase(), apiKey)
   } catch (error) {
     console.error("[v0] Error fetching stock details:", error)
     return getMockStockDetails(symbol)
@@ -109,6 +123,35 @@ export async function getStockDetails(symbol: string): Promise<StockDetails | nu
 }
 
 // Get historical data
+const fetchHistoricalData = async (
+  symbol: string,
+  from: string,
+  to: string,
+  timespan: "day" | "week" | "month",
+  apiKey: string,
+): Promise<HistoricalBar[]> => {
+  const response = await fetch(
+    `${POLYGON_BASE_URL}/v2/aggs/ticker/${symbol}/range/1/${timespan}/${from}/${to}?apiKey=${apiKey}`,
+  )
+
+  if (!response.ok) {
+    throw new Error(`Polygon API error: ${response.status}`)
+  }
+
+  const data = await response.json()
+
+  return data.results.map((bar: any) => ({
+    timestamp: bar.t,
+    open: bar.o,
+    high: bar.h,
+    low: bar.l,
+    close: bar.c,
+    volume: bar.v,
+  }))
+}
+
+const cachedHistoricalData = unstable_cache(fetchHistoricalData, ["polygon", "history"], { revalidate: 300 })
+
 export async function getHistoricalData(
   symbol: string,
   from: string,
@@ -123,24 +166,7 @@ export async function getHistoricalData(
   }
 
   try {
-    const response = await fetch(
-      `${POLYGON_BASE_URL}/v2/aggs/ticker/${symbol}/range/1/${timespan}/${from}/${to}?apiKey=${apiKey}`,
-    )
-
-    if (!response.ok) {
-      throw new Error(`Polygon API error: ${response.status}`)
-    }
-
-    const data = await response.json()
-
-    return data.results.map((bar: any) => ({
-      timestamp: bar.t,
-      open: bar.o,
-      high: bar.h,
-      low: bar.l,
-      close: bar.c,
-      volume: bar.v,
-    }))
+    return await cachedHistoricalData(symbol.toUpperCase(), from, to, timespan, apiKey)
   } catch (error) {
     console.error("[v0] Error fetching historical data:", error)
     return getMockHistoricalData(symbol)
