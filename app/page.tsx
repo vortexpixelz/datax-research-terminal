@@ -9,7 +9,14 @@ import { Send } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import Link from "next/link"
+codex/add-textarea-length-tracking-and-counter
+import { useState } from "react"
+
+const HIGHLIGHT_THRESHOLD = 1000
+const HARD_LIMIT = 1500
+
 import { useEffect, useRef, useState } from "react"
+main
 
 export default function ChatPage() {
   const { messages, sendMessage, status } = useChat({
@@ -22,8 +29,20 @@ export default function ChatPage() {
     }),
   })
 
+codex/add-textarea-length-tracking-and-counter
+  const [input, setInput] = useState("")
+
+  const inputLength = input.length
+  const isOverThreshold = inputLength > HIGHLIGHT_THRESHOLD
+  const isAtOrOverLimit = inputLength >= HARD_LIMIT
+  const counterColorClass = isAtOrOverLimit
+    ? "text-destructive"
+    : isOverThreshold
+      ? "text-amber-500"
+      : "text-muted-foreground"
   const [isApiKeyMissing, setIsApiKeyMissing] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+main
 
   useEffect(() => {
     if (typeof window === "undefined") return
@@ -62,16 +81,15 @@ export default function ChatPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    const textarea = textareaRef.current
-    if (!textarea) return
+    if (!input.trim() || status === "in_progress" || isAtOrOverLimit) return
 
-    const input = textarea.value
-
-    if (!input.trim() || status === "in_progress") return
-
+codex/add-textarea-length-tracking-and-counter
+    sendMessage({ text: input })
+    setInput("")
     if (sendMessageWithKeyCheck({ text: input })) {
       textarea.value = ""
     }
+main
   }
 
   return (
@@ -197,33 +215,39 @@ export default function ChatPage() {
             )}
             <form onSubmit={handleSubmit} className="flex gap-2">
               <Textarea
-                ref={textareaRef}
                 name="message"
                 placeholder="ENTER QUERY: Type your market research question..."
                 className="min-h-[50px] max-h-[150px] resize-none text-sm bg-background"
+                value={input}
+                onChange={(event) => {
+                  setInput(event.target.value)
+                }}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault()
+                    if (isAtOrOverLimit) return
                     const form = e.currentTarget.closest("form")
-                    if (form) {
-                      form.requestSubmit()
-                    }
+                    form?.requestSubmit()
                   }
                 }}
                 disabled={status === "in_progress"}
+                maxLength={HARD_LIMIT}
               />
               <Button
                 type="submit"
                 size="icon"
                 className="h-[50px] w-[50px] bg-primary hover:bg-primary/90"
-                disabled={status === "in_progress"}
+                disabled={status === "in_progress" || isAtOrOverLimit}
               >
                 <Send className="h-4 w-4" />
               </Button>
             </form>
-            <p className="text-xs text-muted-foreground mt-1 uppercase tracking-wide">
-              &gt; ENTER to send | SHIFT+ENTER for new line
-            </p>
+            <div className="flex items-center justify-between mt-1 text-xs uppercase tracking-wide">
+              <p className="text-muted-foreground">&gt; ENTER to send | SHIFT+ENTER for new line</p>
+              <span className={counterColorClass}>
+                {inputLength.toLocaleString()} / {HARD_LIMIT.toLocaleString()}
+              </span>
+            </div>
           </div>
         </div>
       </div>
