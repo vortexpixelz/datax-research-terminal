@@ -34,9 +34,52 @@ export type StockResult = {
   sector: string
 }
 
+const PRESET_CRITERIA: {
+  id: string
+  label: string
+  description: string
+  criteria: ScreenCriteria
+}[] = [
+  {
+    id: "large-cap-growth",
+    label: "Large Cap Growth",
+    description: "$50B+ market cap with higher P/E",
+    criteria: {
+      marketCapMin: 50000000000,
+      peMin: 25,
+      priceMin: 50,
+      changePercentMin: 0,
+    },
+  },
+  {
+    id: "value",
+    label: "Value Picks",
+    description: "Lower P/E, mid to large cap",
+    criteria: {
+      marketCapMin: 10000000000,
+      peMax: 18,
+      priceMin: 10,
+    },
+  },
+  {
+    id: "high-volume-movers",
+    label: "High Volume Movers",
+    description: "$5M+ volume and 2%+ daily move",
+    criteria: {
+      volumeMin: 5000000,
+      changePercentMin: 2,
+      priceMin: 5,
+    },
+  },
+]
+
 export default function ScreenerPage() {
   const [criteria, setCriteria] = useState<ScreenCriteria>({})
   const [searchQuery, setSearchQuery] = useState("")
+  const [activePreset, setActivePreset] = useState<string | null>(null)
+  const [previousCustomCriteria, setPreviousCustomCriteria] = useState<ScreenCriteria | null>(
+    null,
+  )
 
   const allStocks: StockResult[] = [
     {
@@ -173,9 +216,38 @@ export default function ScreenerPage() {
     })
   }, [criteria, searchQuery])
 
+  const handlePresetToggle = (presetId: string) => {
+    if (activePreset === presetId) {
+      setActivePreset(null)
+      setCriteria(previousCustomCriteria ? { ...previousCustomCriteria } : {})
+      setPreviousCustomCriteria(null)
+      return
+    }
+
+    const preset = PRESET_CRITERIA.find((option) => option.id === presetId)
+    if (!preset) return
+
+    if (activePreset === null) {
+      setPreviousCustomCriteria({ ...criteria })
+    }
+
+    setCriteria({ ...preset.criteria })
+    setActivePreset(presetId)
+  }
+
+  const handleCriteriaChange = (nextCriteria: ScreenCriteria) => {
+    if (activePreset) {
+      setActivePreset(null)
+      setPreviousCustomCriteria(null)
+    }
+    setCriteria(nextCriteria)
+  }
+
   const handleReset = () => {
     setCriteria({})
     setSearchQuery("")
+    setActivePreset(null)
+    setPreviousCustomCriteria(null)
   }
 
   return (
@@ -201,7 +273,31 @@ export default function ScreenerPage() {
             </div>
           </div>
 
-          <ScreenerFilters criteria={criteria} onCriteriaChange={setCriteria} />
+          <div className="space-y-3">
+            <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+              Quick Filters
+            </Label>
+            <div className="flex flex-col gap-2">
+              {PRESET_CRITERIA.map((preset) => {
+                const isActive = activePreset === preset.id
+                return (
+                  <Button
+                    key={preset.id}
+                    variant={isActive ? "default" : "outline"}
+                    size="sm"
+                    className="h-auto py-2 px-3 flex flex-col items-start justify-start gap-1 text-left"
+                    onClick={() => handlePresetToggle(preset.id)}
+                    aria-pressed={isActive}
+                  >
+                    <span className="font-medium leading-tight">{preset.label}</span>
+                    <span className="text-xs text-muted-foreground leading-tight">{preset.description}</span>
+                  </Button>
+                )
+              })}
+            </div>
+          </div>
+
+          <ScreenerFilters criteria={criteria} onCriteriaChange={handleCriteriaChange} />
 
           <div className="flex gap-2">
             <Button onClick={handleReset} variant="outline" className="flex-1 bg-transparent">
