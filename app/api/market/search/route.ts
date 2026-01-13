@@ -1,4 +1,30 @@
+import { unstable_cache } from "next/cache"
 import { type NextRequest, NextResponse } from "next/server"
+
+const cachedTickerSearch = unstable_cache(
+  async (query: string, apiKey: string) => {
+    const response = await fetch(
+      `https://api.polygon.io/v3/reference/tickers?search=${encodeURIComponent(query)}&active=true&limit=10&apiKey=${apiKey}`,
+    )
+
+    if (!response.ok) {
+      throw new Error(`Polygon API error: ${response.status}`)
+    }
+
+    const data = await response.json()
+
+    return (
+      data.results?.map((ticker: any) => ({
+        symbol: ticker.ticker,
+        name: ticker.name,
+        type: ticker.type,
+        exchange: ticker.primary_exchange || ticker.market,
+      })) || []
+    )
+  },
+  ["polygon", "search"],
+  { revalidate: 120 },
+)
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
@@ -18,24 +44,9 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const response = await fetch(
-      `https://api.polygon.io/v3/reference/tickers?search=${encodeURIComponent(query)}&active=true&limit=10&apiKey=${apiKey}`,
-    )
+    const results = await cachedTickerSearch(query, apiKey)
 
-    if (!response.ok) {
-      throw new Error(`Polygon API error: ${response.status}`)
-    }
-
-    const data = await response.json()
-
-    const results = data.results?.map((ticker: any) => ({
-      symbol: ticker.ticker,
-      name: ticker.name,
-      type: ticker.type,
-      exchange: ticker.primary_exchange || ticker.market,
-    }))
-
-    return NextResponse.json({ results: results || [] })
+    return NextResponse.json({ results })
   } catch (error) {
     console.error("[v0] Error searching tickers:", error)
     return NextResponse.json({
